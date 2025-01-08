@@ -91,30 +91,30 @@ calc_gradient <- function(data, sim_runs, n, jj, model_est, latent1_index = 1, l
   cnt_cor_val <- (cnt_x_vars*cnt_x_vars - cnt_x_vars)/2
   
   cor_data <- cor(data)
-  htmt2_base <- semTools::htmt(model = model_est,
+  htmt2_base_matrix <- semTools::htmt(model = model_est,
                           data =  NULL, 
                           sample.cov = cor_data,
                           htmt2 = TRUE
   )
-  htmt_base <-  semTools::htmt(model = model_est,
+  htmt2_base <- htmt2_base_matrix[latent_vars[latent1_index], latent_vars[latent2_index]]
+  htmt_base_matrix <-  semTools::htmt(model = model_est,
                           data =  NULL, 
                           sample.cov = cor_data,
                           htmt2 = FALSE
   )
+  htmt_base <- htmt_base_matrix[latent_vars[latent1_index], latent_vars[latent2_index]]
   
-  # für den Gradienten der pfadestimates
-  gr = matrix(0 , nrow = size_n_ , ncol = 1)
-  gdr = matrix(0 , nrow = size_n_ , ncol = 1)
+  
   # Path estimates
-  dlta_bt_htmt2 = matrix(0 , nrow = cnt_x_vars , ncol = cnt_cor_val)
-  dlta_bt_htmt = matrix(0 , nrow = cnt_x_vars, ncol = cnt_cor_val)
+  dlta_bt_htmt2 = matrix(0 , nrow = 1, ncol = cnt_cor_val)
+  dlta_bt_htmt = matrix(0 , nrow = 1, ncol = cnt_cor_val)
   # für die h - Methode
   list_dh <- c(0.00001, 0.0001, 0.001, 0.01, 0.1)
   #Übersicht für verschiedene dh
   gradient_htmt <- data.frame(matrix(0, nrow = cnt_cor_val, ncol = length(list_dh)))
   colnames(gradient_htmt) <- list_dh
   
-  gradient_htmt2 <-data.frame(matrix(0, nrow = cnt_cor_val, ncol = 1))
+  gradient_htmt2 <-data.frame(matrix(0, nrow = cnt_cor_val, ncol = length(list_dh)))
   colnames(gradient_htmt2) <- list_dh
   
   
@@ -140,24 +140,23 @@ calc_gradient <- function(data, sim_runs, n, jj, model_est, latent1_index = 1, l
                                 htmt2 = FALSE
         )
         # in h-Methode: f(x+h):
-        bt_htmt2 = htmt2[latent_vars[latent1_index], latent_vars[latent1_index]]
-        bt_htmt = htmt[latent_vars[latent1_index], latent_vars[latent1_index]]
+        bt_htmt2 = htmt2[latent_vars[latent1_index], latent_vars[latent2_index]]
+        bt_htmt = htmt[latent_vars[latent1_index], latent_vars[latent2_index]]
         # f(x+h) - f(x) / h
-        dlta_bt_htmt2[, cnter] = (bt_htmt2 - htmt2_base)/dh
-        dlta_bt_htmt[, cnter] = (bt_htmt - htmt_base)/dh
+        dlta_bt_htmt2[1, cnter] = (bt_htmt2 - htmt2_base)/dh
+        dlta_bt_htmt[1, cnter] = (bt_htmt - htmt_base)/dh
         
         cnter = cnter + 1
       }
     }
     cnter <- 1
-    gradient_htmt[, paste0(dh)]  <- dlta_bt_htmt
-    gradient_htmt2[, paste0(dh)]  <- dlta_bt_htmt2
-    Gbt = matrix(0 , nrow = Anzahl_path_estimate , ncol = size_n_)
-    Gbt2 = matrix(0 , nrow = Anzahl_path_estimate , ncol = size_n_)
+    gradient_htmt[, paste0(dh)]  <- dlta_bt_htmt[1,]
+    gradient_htmt2[, paste0(dh)]  <- dlta_bt_htmt2[1,]
+    dlta_bt_htmt2 = matrix(0 , nrow = 1 , ncol = cnt_cor_val)
+    dlta_bt_htmt = matrix(0 , nrow = 1, ncol = cnt_cor_val)
   }
   
-  Gbt_x1 <- t(as.matrix(Gbt_overview_delta[,"1e-05"]))
-  Gbt_x2 <- t(as.matrix(Gbt_overview_delta[,"1e-05"]))
+  results(gradient_htmt, gradient_htmt2)
 }
 
 
