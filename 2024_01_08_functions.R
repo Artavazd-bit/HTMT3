@@ -81,10 +81,91 @@ calculate_corr_cov <- function(data){
   return(vc_r)
 }
 
-library(stringr)
+##improved cov-matrix of corr calculation from claude: 
+## still need to check if everything is correct, its way faster than my code
+
+calculate_corr_cov_fast <- function(data) {
+  n <- nrow(data)
+  p <- ncol(data)
+  size_n <- (p * p - p) / 2
+  
+  # Pre-calculate means and centered data
+  data_means <- colMeans(data)
+  data_centered <- scale(data, center = TRUE, scale = FALSE)
+  data_sd <- apply(data, 2, sd)
+  
+  # Create indices for upper triangle
+  indices <- which(upper.tri(matrix(0, p, p)), arr.ind = TRUE)
+  
+  # Initialize result matrix
+  vc_r <- matrix(0, nrow = size_n, ncol = size_n)
+  
+  # Pre-calculate all possible products of centered variables
+  products <- array(0, dim = c(n, p, p))
+  for(i in 1:p) {
+    for(j in i:p) {
+      products[, i, j] <- data_centered[, i] * data_centered[, j]
+      products[, j, i] <- products[, i, j]
+    }
+  }
+  
+  # Function to get position in upper triangular matrix
+  get_pos <- function(i, j) {
+    if(i > j) {
+      temp <- i
+      i <- j
+      j <- temp
+    }
+    return(p*(i-1) - i*(i-1)/2 + j - i)
+  }
+  
+  # Calculate covariances using vectorized operations
+  for(idx1 in 1:nrow(indices)) {
+    x <- indices[idx1, 1]
+    y <- indices[idx1, 2]
+    
+    for(idx2 in idx1:nrow(indices)) {
+      z <- indices[idx2, 1]
+      t <- indices[idx2, 2]
+      
+      # Calculate fourth-order moments using pre-computed products
+      mu_xyzt <- mean(products[, x, y] * products[, z, t])
+      
+      mu_xxzt <- mean(products[, x, x] * products[, z, t])
+      mu_yyzt <- mean(products[, y, y] * products[, z, t])
+      mu_xyzz <- mean(products[, x, y] * products[, z, z])
+      mu_xytt <- mean(products[, x, y] * products[, t, t])
+      
+      mu_xxtt <- mean(products[, x, x] * products[, t, t])
+      mu_xxzz <- mean(products[, x, x] * products[, z, z])
+      mu_yytt <- mean(products[, y, y] * products[, t, t])
+      mu_yyzz <- mean(products[, y, y] * products[, z, z])
+      
+      # Get correlation coefficients
+      rxy <- cor(data[, x], data[, y])
+      rzt <- cor(data[, z], data[, t])
+      
+      # Calculate covariance
+      cov_val <- (mu_xyzt - 0.5 * rxy * (mu_xxzt + mu_yyzt) - 
+                    0.5 * rzt * (mu_xyzz + mu_xytt) + 
+                    0.25 * rxy * rzt * (mu_xxzz + mu_xxtt + mu_yyzz + mu_yytt)) / n
+      
+      pos1 <- get_pos(x, y)
+      pos2 <- get_pos(z, t)
+      
+      vc_r[pos1, pos2] <- cov_val
+      vc_r[pos2, pos1] <- cov_val  # Matrix is symmetric
+    }
+  }
+  
+  return(vc_r)
+}
+
+## gradient calculation
+
 
 calc_gradient <- function(data, sim_runs, n, jj, model_est, latent1_index = 1, latent2_index = 2){
-  
+  library(stringr)
   latent_vars <- str_extract_all(model_est, "xi_[0-9]+")[[1]]
   x_vars <- str_extract_all(model_est, "x\\d+")[[1]]
   cnt_x_vars <- length(x_vars)
@@ -156,7 +237,7 @@ calc_gradient <- function(data, sim_runs, n, jj, model_est, latent1_index = 1, l
     dlta_bt_htmt = matrix(0 , nrow = 1, ncol = cnt_cor_val)
   }
   
-  results(gradient_htmt, gradient_htmt2)
+  return(list(htmt = gradient_htmt, htmt2 = gradient_htmt2))
 }
 
 
