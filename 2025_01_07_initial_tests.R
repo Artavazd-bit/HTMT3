@@ -1,7 +1,8 @@
 # first test with a reflective two factor model
 # one latent variable will have 3 items the other 4 for the beginning 
 # later i want to test different  combinations
-
+# i use lavaan::simulateData to simulate the data
+# 
 library(lavaan)
 library(semTools)
 library(cSEM)
@@ -12,7 +13,7 @@ model_dgp <- '
                 xi_1 =~ 0.3*x11 + 0.4*x12 + 0.5*x13
                 xi_2 =~ 0.3*x21 + 0.4*x22 + 0.5*x23 + 0.3*x24
               #  fix covariances between xi_1 and xi_2
-                xi_1 ~~ 0.6*xi_2
+                xi_1 ~~ 1*xi_2
               ' 
 
 model_est <- '
@@ -39,7 +40,7 @@ data_cfa <- lavaan::simulateData(model = model_dgp,
                             auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
                             auto.cov.lv.x = TRUE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
                             auto.cov.y = TRUE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
-                            sample.nobs = 500L, # Number of observations.
+                            sample.nobs = 10000L, # Number of observations.
                             ov.var = NULL,# The user-specified variances of the observed variables.
                             group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
                             skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
@@ -49,16 +50,17 @@ data_cfa <- lavaan::simulateData(model = model_dgp,
                             empirical = FALSE, # Logical. If TRUE, the implied moments (Mu and Sigma) specify the empirical not population mean and covariance matrix.
                             
                             return.type = "data.frame",
+                            
                             return.fit = TRUE, # If TRUE, return the fitted model that has been used to generate the data as an attribute (called "fit"); this may be useful for inspection.
                             debug = TRUE, # If TRUE, debugging information is displayed.
                             standardized = FALSE # If TRUE, the residual variances of the observed variables are set in such a way such that the model implied variances are unity. This allows regression coefficients and factor loadings (involving observed variables) to be specified in a standardized metric.
                             )
 
-# first i want to test 
+# first i want to see how the data fits the model
 fit_cfa <- lavaan::cfa(model  = model_est, 
                        data = data_cfa
                        )
-
+# i found this function, still need to figure it out
 discriminantValidity(object = fit_cfa,
                      cutoff = 0.9,
                      merge = FALSE,
@@ -69,15 +71,30 @@ discriminantValidity(object = fit_cfa,
 # data to covariance
 cov_data_cfa <- var(data_cfa)
 
-
-semTools::htmt(model = model_est,
+# calculate the htmt of the data from above
+htmt <- semTools::htmt(model = model_est,
                data =  NULL, 
                sample.cov = cov_data_cfa,
-               htmt2 = TRUE
+               htmt2 = FALSE
                )
-vc_r <- calculate_corr_cov(data = data_cfa)
+# calculate the covariance-variance matrix of the correlationmatrix of the data from above
+# functions are defined in 2024_08_01_functions.R
+vc_r <- calculate_corr_cov_fast(data = data_cfa)
 
+# calculate the gradient of the htmt - Function
+# it has two outputs in a list, a gradient for htmt and htmt2 
+gradient <- calc_gradient(data = data_cfa, # data
+                          sim_runs = 1, # param for simulation
+                          n = length(data_cfa), 
+                          jj = 1, # param for simulation
+                          model_est, # model
+                          latent1_index = 1, # when i want to include more latent variables i can specify here which relationship i want to test 
+                          latent2_index = 2) # when i want to include more latent variables i can specify here which relationship i want to test 
+gradient
+gr <- t(gradient$htmt$`1e-05`)
 
+sqrt(diag( gr %*% vc_r %*% t(gr)))
 
-
+# i want to test if i'm siginificantly from 1 different, no ? 
+(htmt[1,2] - 1)/sqrt(gr %*% vc_r %*% t(gr))
 
