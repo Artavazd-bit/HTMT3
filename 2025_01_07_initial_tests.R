@@ -20,6 +20,7 @@ model_est <- '
               #  latent variables
                 xi_1 =~ x11 + x12 + x13
                 xi_2 =~ x21 + x22 + x23 + x24
+                
               ' 
 
 
@@ -40,7 +41,7 @@ data_cfa <- lavaan::simulateData(model = model_dgp,
                             auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
                             auto.cov.lv.x = TRUE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
                             auto.cov.y = TRUE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
-                            sample.nobs = 10000L, # Number of observations.
+                            sample.nobs = 500L, # Number of observations.
                             ov.var = NULL,# The user-specified variances of the observed variables.
                             group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
                             skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
