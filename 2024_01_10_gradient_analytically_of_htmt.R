@@ -44,12 +44,70 @@ calc_grad_htmt_anal <- function(data, model, latent1, latent2){
   
   cor_subset_data <- cor(subset_data)
   
-  combos <- lapply(indicators, combn(,2))
+  cor_subset_data_mono1 <- cor_subset_data[unlist(indicators[1], FALSE), unlist(indicators[1], FALSE)]
+  cor_subset_data_mono2 <- cor_subset_data[unlist(indicators[2], FALSE), unlist(indicators[2], FALSE)]
+  cor_subset_data_het <- cor_subset_data[unlist(indicators[2], FALSE), unlist(indicators[1], FALSE)]
   
-  # Convert to data frame
-  combos_df <- data.frame(
-    var1 = combos[1,],
-    var2 = combos[2,]
-  )
+  cor_subset_data_mono1_val <- cor_subset_data_mono1[lower.tri(cor_subset_data_mono1)]
+  cor_subset_data_mono2_val <- cor_subset_data_mono2[lower.tri(cor_subset_data_mono2)]
   
-}
+  K_i <- length(unlist(indicators[1]))
+  K_j <- length(unlist(indicators[2]))
+  
+  A = 1/(K_i*K_j) * sum(cor_subset_data_het)
+  B = 2/(K_i*(K_i-1)) *  sum(cor_subset_data_mono1_val) 
+  C = 2/(K_j*(K_j-1)) *  sum(cor_subset_data_mono2_val) 
+  
+  HTMT <- A / ((B*C)^(1/2))
+  
+  het_grad <- (1/(K_i*K_j) )/((B*C)^(1/2))
+  
+  mono1_grad <- A * 1/2 * 2/(K_i*(K_i-1)) * C * (B*C)^(-3/2) * -1
+  mono2_grad <-  A * 1/2 * 2/(K_j*(K_j-1)) * B * (B*C)^(-3/2) * -1
+  
+  c(het_grad,
+  mono1_grad,
+  mono2_grad)
+} 
+
+calc_grad_htmt_anal(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2")
+
+calc_grad_htmt2_anal <- function(data, model, latent1, latent2){
+  indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model_est)
+  
+  all_indicators <- unlist(indicators)
+  
+  subset_data <- data[, all_indicators]
+  
+  cor_subset_data <- cor(subset_data)
+  
+  cor_subset_data_mono1 <- cor_subset_data[unlist(indicators[1], FALSE), unlist(indicators[1], FALSE)]
+  cor_subset_data_mono2 <- cor_subset_data[unlist(indicators[2], FALSE), unlist(indicators[2], FALSE)]
+  cor_subset_data_het <- cor_subset_data[unlist(indicators[2], FALSE), unlist(indicators[1], FALSE)]
+  
+  cor_subset_data_mono1_val <- cor_subset_data_mono1[lower.tri(cor_subset_data_mono1)]
+  cor_subset_data_mono2_val <- cor_subset_data_mono2[lower.tri(cor_subset_data_mono2)]
+  
+  K_i <- length(unlist(indicators[1]))
+  K_j <- length(unlist(indicators[2]))
+  
+  A =  prod(cor_subset_data_het)^(1/(K_i*K_j))
+  B =  prod(cor_subset_data_mono1_val)^(2/(K_i*(K_i-1))) 
+  C =  prod(cor_subset_data_mono2_val)^(2/(K_j*(K_j-1))) 
+  
+  HTMT2 <- A / ((B*C)^(1/2))
+  
+  het_grad <- (1/(K_i*K_j) )/((B*C)^(1/2))
+  
+  mono1_grad <- A * 1/2 * 2/(K_i*(K_i-1)) * C * (B*C)^(-3/2) * -1
+  mono2_grad <-  A * 1/2 * 2/(K_j*(K_j-1)) * B * (B*C)^(-3/2) * -1
+  
+  c(het_grad,
+    mono1_grad,
+    mono2_grad)
+} 
+
+
+
+
+

@@ -6,6 +6,7 @@
 library(lavaan)
 library(semTools)
 library(cSEM)
+library(stringr)
 
 
 model_dgp <- '
@@ -13,7 +14,7 @@ model_dgp <- '
                 xi_1 =~ 0.3*x11 + 0.4*x12 + 0.5*x13
                 xi_2 =~ 0.3*x21 + 0.4*x22 + 0.5*x23 + 0.3*x24
               #  fix covariances between xi_1 and xi_2
-                xi_1 ~~ 1*xi_2
+                xi_1 ~~ 0.5*xi_2
               ' 
 
 model_est <- '
@@ -21,6 +22,7 @@ model_est <- '
                 xi_1 =~ x11 + x12 + x13
                 xi_2 =~ x21 + x22 + x23 + x24
                 
+                xi_1 ~~ xi_2
               ' 
 
 
@@ -76,7 +78,7 @@ cov_data_cfa <- var(data_cfa)
 htmt <- semTools::htmt(model = model_est,
                data =  NULL, 
                sample.cov = cov_data_cfa,
-               htmt2 = FALSE
+               htmt2 = TRUE
                )
 # calculate the covariance-variance matrix of the correlationmatrix of the data from above
 # functions are defined in 2024_08_01_functions.R
@@ -98,4 +100,10 @@ sqrt(diag( gr %*% vc_r %*% t(gr)))
 
 # i want to test if i'm siginificantly from 1 different, no ? 
 (htmt[1,2] - 1)/sqrt(gr %*% vc_r %*% t(gr))
+
+
+cSEM::csem(.data = data_cfa, .model = model_est, )
+
+
+cSEM::calculateHTMT()
 
