@@ -14,7 +14,7 @@ model_dgp <- '
                 xi_1 =~ 0.3*x11 + 0.4*x12 + 0.5*x13
                 xi_2 =~ 0.3*x21 + 0.4*x22 + 0.5*x23 + 0.3*x24
               #  fix covariances between xi_1 and xi_2
-                xi_1 ~~ 0.5*xi_2
+                xi_1 ~~ 0.8*xi_2
               ' 
 
 model_est <- '
@@ -94,7 +94,12 @@ gradient <- calc_gradient(data = data_cfa, # data
                           latent1_index = 1, # when i want to include more latent variables i can specify here which relationship i want to test 
                           latent2_index = 2) # when i want to include more latent variables i can specify here which relationship i want to test 
 gradient
+
 gr <- t(gradient$htmt$`1e-05`)
+
+calc_grad_htmt_anal(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2")
+calc_grad_htmt2_anal(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2")
+
 
 sqrt(diag( gr %*% vc_r %*% t(gr)))
 
