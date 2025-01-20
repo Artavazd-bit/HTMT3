@@ -93,12 +93,13 @@ gradient <- calc_gradient(data = data_cfa, # data
                           model_est, # model
                           latent1_index = 1, # when i want to include more latent variables i can specify here which relationship i want to test 
                           latent2_index = 2) # when i want to include more latent variables i can specify here which relationship i want to test 
-gradient
+
+gradient$htmt2$`1e-05`
 
 gr <- t(gradient$htmt$`1e-05`)
 
-calc_grad_htmt_anal(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2")
-calc_grad_htmt2_anal(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2")
+calc_grad_htmt_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2")
+calc_grad_htmt2_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2")
 
 
 sqrt(diag( gr %*% vc_r %*% t(gr)))
