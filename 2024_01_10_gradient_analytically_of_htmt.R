@@ -36,7 +36,7 @@ extract_indicators <- function(lv1, lv2, model_syntax) {
 
 
 calc_grad_htmt_ana <- function(data, model, latent1, latent2){
-  indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model_est)
+  indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model)
   
   all_indicators <- unlist(indicators)
   
@@ -73,7 +73,7 @@ calc_grad_htmt_ana <- function(data, model, latent1, latent2){
 
 
 calc_grad_htmt2_ana <- function(data, model, latent1, latent2){
-  indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model_est)
+  indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model)
   
   all_indicators <- unlist(indicators)
   

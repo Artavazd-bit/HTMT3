@@ -165,7 +165,6 @@ calculate_corr_cov_fast <- function(data) {
 
 
 calc_gradient <- function(data, sim_runs, n, jj, model_est, latent1_index = 1, latent2_index = 2){
-  library(stringr)
   latent_vars <- str_extract_all(model_est, "xi_[0-9]+")[[1]]
   x_vars <- str_extract_all(model_est, "x\\d+")[[1]]
   cnt_x_vars <- length(x_vars)

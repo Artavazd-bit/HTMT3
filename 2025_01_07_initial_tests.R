@@ -14,7 +14,7 @@ model_dgp <- '
                 xi_1 =~ 0.3*x11 + 0.4*x12 + 0.5*x13
                 xi_2 =~ 0.3*x21 + 0.4*x22 + 0.5*x23 + 0.3*x24
               #  fix covariances between xi_1 and xi_2
-                xi_1 ~~ 0.8*xi_2
+                xi_1 ~~ 1*xi_2
               ' 
 
 model_est <- '
@@ -48,7 +48,7 @@ data_cfa <- lavaan::simulateData(model = model_dgp,
                             group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
                             skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
                             kurtosis = NULL, # Numeric vector. The kurtosis values for the observed variables. Defaults to zero.
-                            seed = NULL, # Set random seed.
+                            seed = 1+100+4, # Set random seed.
                             
                             empirical = FALSE, # Logical. If TRUE, the implied moments (Mu and Sigma) specify the empirical not population mean and covariance matrix.
                             
