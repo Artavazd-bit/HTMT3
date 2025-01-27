@@ -35,14 +35,19 @@ extract_indicators <- function(lv1, lv2, model_syntax) {
 }
 
 
-calc_grad_htmt_ana <- function(data, model, latent1, latent2){
+calc_grad_htmt_ana <- function(data, model, latent1, latent2, scale = TRUE){
   indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model)
   
   all_indicators <- unlist(indicators)
   
   subset_data <- data[, all_indicators]
   
-  cor_subset_data <- cor(subset_data)
+  if(scale == FALSE){
+    cor_subset_data <- cov(subset_data)
+  } else { 
+    cor_subset_data <- cor(subset_data)
+  }  
+  
   
   ind <- which( lower.tri(cor_subset_data,diag=F) , arr.ind = TRUE )
   cor_values <- data.frame( col = dimnames(cor_subset_data)[[2]][ind[,2]] ,
@@ -67,19 +72,23 @@ calc_grad_htmt_ana <- function(data, model, latent1, latent2){
   cor_values$gradient[cor_values$type == "mono1"] <- A * 1/2 * 2/(K_i*(K_i-1)) * C * (B*C)^(-3/2) * -1
   cor_values$gradient[cor_values$type == "mono2"] <- A * 1/2 * 2/(K_j*(K_j-1)) * B * (B*C)^(-3/2) * -1
   
-  cor_values
+  list(output = cor_values, HTMT = HTMT)
 } 
 
 
 
-calc_grad_htmt2_ana <- function(data, model, latent1, latent2){
+calc_grad_htmt2_ana <- function(data, model, latent1, latent2, scale = TRUE){
   indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model)
   
   all_indicators <- unlist(indicators)
   
   subset_data <- data[, all_indicators]
   
-  cor_subset_data <- cor(subset_data)
+  if(scale == FALSE){
+    cor_subset_data <- cov(subset_data)
+  } else { 
+    cor_subset_data <- cor(subset_data)
+  }  
   
   ind <- which( lower.tri(cor_subset_data,diag=F) , arr.ind = TRUE )
   cor_values <- data.frame( col = dimnames(cor_subset_data)[[2]][ind[,2]] ,
@@ -102,7 +111,7 @@ calc_grad_htmt2_ana <- function(data, model, latent1, latent2){
   cor_values$gradient[cor_values$type == "mono1"] <- A * 1/2 * (2/(K_i*(K_i-1))) * prod(cor_values$val[cor_values$type == "mono1"])^((2/(K_i*(K_i-1)))-1) * prod(cor_values$val[cor_values$type == "mono1"])/cor_values$val[cor_values$type == "mono1"] * C * (B*C)^(-3/2) * -1
   cor_values$gradient[cor_values$type == "mono2"] <- A * 1/2 * (2/(K_j*(K_j-1))) * prod(cor_values$val[cor_values$type == "mono2"])^((2/(K_j*(K_j-1)))-1) * prod(cor_values$val[cor_values$type == "mono2"])/cor_values$val[cor_values$type == "mono2"] * B * (B*C)^(-3/2) * -1
   
-  cor_values
+  list(output = cor_values, HTMT2 = HTMT2)
 } 
 
 
