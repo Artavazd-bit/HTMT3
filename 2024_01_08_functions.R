@@ -109,6 +109,8 @@ calculate_corr_cov_fast <- function(data) {
     }
   }
   
+  
+  
   # Function to get position in upper triangular matrix
   get_pos <- function(i, j) {
     if(i > j) {
@@ -128,18 +130,21 @@ calculate_corr_cov_fast <- function(data) {
       z <- indices[idx2, 1]
       t <- indices[idx2, 2]
       
+      sd <- sd(data[,x]) * sd(data[,y]) * sd(data[,z]) * sd(data[,t])
+      
+  
       # Calculate fourth-order moments using pre-computed products
-      mu_xyzt <- mean(products[, x, y] * products[, z, t])
+      mu_xyzt <- mean(products[, x, y] * products[, z, t])  / sd
       
-      mu_xxzt <- mean(products[, x, x] * products[, z, t])
-      mu_yyzt <- mean(products[, y, y] * products[, z, t])
-      mu_xyzz <- mean(products[, x, y] * products[, z, z])
-      mu_xytt <- mean(products[, x, y] * products[, t, t])
+      mu_xxzt <- mean(products[, x, x] * products[, z, t]) / sd
+      mu_yyzt <- mean(products[, y, y] * products[, z, t]) / sd
+      mu_xyzz <- mean(products[, x, y] * products[, z, z]) / sd
+      mu_xytt <- mean(products[, x, y] * products[, t, t]) / sd
       
-      mu_xxtt <- mean(products[, x, x] * products[, t, t])
-      mu_xxzz <- mean(products[, x, x] * products[, z, z])
-      mu_yytt <- mean(products[, y, y] * products[, t, t])
-      mu_yyzz <- mean(products[, y, y] * products[, z, z])
+      mu_xxtt <- mean(products[, x, x] * products[, t, t]) / sd
+      mu_xxzz <- mean(products[, x, x] * products[, z, z]) / sd
+      mu_yytt <- mean(products[, y, y] * products[, t, t]) / sd
+      mu_yyzz <- mean(products[, y, y] * products[, z, z]) / sd
       
       # Get correlation coefficients
       rxy <- cor(data[, x], data[, y])
