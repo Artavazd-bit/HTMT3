@@ -105,8 +105,8 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                   Gradient_htmt <- as.matrix(gradient_htmt_1$output$gradient)
                   Gradient_htmt_2 <- as.matrix(gradient_htmt_2$output$gradient)
                   
-                  se_htmt_1 = sqrt(t(Gradient_htmt) %*% vc_r %*% Gradient_htmt)
-                  se_htmt_2 = sqrt(t(Gradient_htmt_2) %*% vc_r %*% Gradient_htmt_2)
+                  se_htmt_1 = sqrt(t(Gradient_htmt) %*% vc_r %*% Gradient_htmt / n)
+                  se_htmt_2 = sqrt(t(Gradient_htmt_2) %*% vc_r %*% Gradient_htmt_2 / n)
                   
                   t_value_htmt_1 = (htmt_1[1,2] - 1)/se_htmt_1
                   t_value_htmt_2 = (htmt_2[1,2] - 1)/se_htmt_2
