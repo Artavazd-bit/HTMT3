@@ -153,7 +153,7 @@ calculate_corr_cov_fast <- function(data) {
       # Calculate covariance
       cov_val <- (mu_xyzt - 0.5 * rxy * (mu_xxzt + mu_yyzt) - 
                     0.5 * rzt * (mu_xyzz + mu_xytt) + 
-                    0.25 * rxy * rzt * (mu_xxzz + mu_xxtt + mu_yyzz + mu_yytt)) / n
+                    0.25 * rxy * rzt * (mu_xxzz + mu_xxtt + mu_yyzz + mu_yytt))
       
       pos1 <- get_pos(x, y)
       pos2 <- get_pos(z, t)
