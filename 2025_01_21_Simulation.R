@@ -5,6 +5,7 @@ library(stringr)
 library(doParallel)
 library(foreach)
 library(dplyr)
+library(boot)
 
 source("2024_01_08_functions.R")
 source("2024_01_10_gradient_analytically_of_htmt.R")
@@ -55,12 +56,11 @@ model_est <- '
 cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
-sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semTools", "stringr"), .combine = "rbind") %:%
-                foreach(n = c(50, 100, 200, 500, 1000, 10000), .combine = "rbind") %:%
-                foreach(sim_runs = 1:10000, .combine = "rbind") %dopar%
+sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
+                foreach(n = c(25, 50, 100, 200, 500, 1000, 10000, 100000), .combine = "rbind") %:%
+                foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
                 {
                   data_cfa <- lavaan::simulateData(model = model_list[[jj]],
-                                                   
                                                    model.type = "cfa",
                                                    meanstructure = FALSE, # means of observed variables enter the model
                                                    int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
@@ -86,7 +86,8 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                                                    return.fit = FALSE, # If TRUE, return the fitted model that has been used to generate the data as an attribute (called "fit"); this may be useful for inspection.
                                                    debug = FALSE, # If TRUE, debugging information is displayed.
                                                    standardized = FALSE # If TRUE, the residual variances of the observed variables are set in such a way such that the model implied variances are unity. This allows regression coefficients and factor loadings (involving observed variables) to be specified in a standardized metric.
-                  )
+                                                   )
+                  
                   
                   htmt_2 <- semTools::htmt(model = model_est,
                                          data =  data_cfa, 
@@ -115,17 +116,40 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                   gradient_htmt_1_1 <- calc_grad_htmt_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE)
                   gradient_htmt_2_1 <- calc_grad_htmt2_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE) 
                   
+                  
+                  
+                  #Bootstrapping
+                  HTMT_function <- function(data, indices){
+                    d <- data[indices,]
+                    output <- calc_grad_htmt_ana(data = d, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE)
+                    return(output$HTMT)
+                  }
+                  bootstrap <- boot(data_cfa, HTMT_function, R=n)
+                  
+                  bootstrap_htmt_1_se <- sd(bootstrap$t)
+                  bootstrap_htmt_1_bias <- bootstrap$t0 - mean(bootstrap$t)
+                  t_value_htmt_1_bootstrap <- (gradient_htmt_1$HTMT-1)/bootstrap_htmt_1_se
+                  
+                  
+                  
                   save <- data.frame( true_corr = corr_vector[jj],
                                       n = n,
                                       sim_runs,
                                       htmt_1 = htmt_1[1,2],
-                                      se_htmt_1 = se_htmt_1,
+                                      se_htmt_1_delta = se_htmt_1,
                                       t_value_htmt_1 = t_value_htmt_1,
                                       t_test_htmt_1 = t_value_htmt_1 < qnorm(0.05),
+                                      
+                                      se_htmt_1_boot =  bootstrap_htmt_1_se,
+                                      boot_htmt_1_bias = bootstrap_htmt_1_bias, 
+                                      t_value_htmt_1_boot = t_value_htmt_1_bootstrap, 
+                                      t_test_htmt_1_boot = t_value_htmt_1_bootstrap < qnorm(0.05),
+                                      
                                       htmt_2 = htmt_2[1,2],
                                       se_htmt_2 = se_htmt_2,
                                       t_value_htmt_2 = t_value_htmt_2,
                                       t_test_htmt_2 = t_value_htmt_2 < qnorm(0.05),
+                                      
                                       htmt_1_self_cor = gradient_htmt_1$HTMT,
                                       htmt_2_self_cor = gradient_htmt_2$HTMT2,
                                       htmt_1_self_cov = gradient_htmt_1_1$HTMT,
@@ -144,4 +168,5 @@ sim_overview_without_NA <- na.omit(sim_overview)
 sim_overview_2 <- sim_overview %>% 
   group_by(true_corr, n) %>%
   summarize(Rejection_rate_htmt_1= mean(t_test_htmt_1), 
-            Rejection_rate_htmt_2 = mean(t_test_htmt_2))
+            Rejection_rate_htmt_2 = mean(t_test_htmt_2), 
+            Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot))
