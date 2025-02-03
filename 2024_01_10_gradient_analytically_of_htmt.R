@@ -154,7 +154,7 @@ calc_htmt <- function(data, model, latent1, latent2, scale = TRUE, htmt2 = FALSE
   else{
     print("ERROR")
   }
-  list(HTMT)
+  return(HTMT)
 } 
 
 
