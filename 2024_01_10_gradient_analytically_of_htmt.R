@@ -145,7 +145,7 @@ calc_htmt <- function(data, model, latent1, latent2, scale = TRUE, htmt2 = FALSE
   C = 2/(K_j*(K_j-1)) *  sum(cor_values$val[cor_values$type == "mono2"]) 
   HTMT <- A / ((B*C)^(1/2))
   }
-  ifelse(htmt2 == TRUE){
+  else if(htmt2 == TRUE){
     A =  prod(cor_values$val[cor_values$type == "het"])^(1/(K_i*K_j))
     B =  prod(cor_values$val[cor_values$type == "mono1"])^(2/(K_i*(K_i-1))) 
     C =  prod(cor_values$val[cor_values$type == "mono2"])^(2/(K_j*(K_j-1))) 
