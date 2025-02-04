@@ -88,7 +88,7 @@ cov_data_cfa <- var(data_cfa)
 htmt <- semTools::htmt(model = model_est,
                data =  data_cfa, 
                sample.cov = NULL,
-               htmt2 = FALSE
+               htmt2 = TRUE
                )
 # calculate the covariance-variance matrix of the correlationmatrix of the data from above
 # functions are defined in 2024_08_01_functions.R
@@ -124,4 +124,6 @@ cSEM::csem(.data = data_cfa, .model = model_est, )
 
 
 cSEM::calculateHTMT()
+calc_htmt(data = data_cfa, model = model_est, latent1 = "xi_1", "xi_2", scale = TRUE, htmt2 = FALSE)
 
+calc_htmt(data = data_cfa, model = model_est, latent1 = "xi_1", "xi_2", scale = TRUE, htmt2 = TRUE)
