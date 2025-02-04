@@ -63,8 +63,8 @@ cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
 sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
-                foreach(n = c(25, 50, 100, 200), .combine = "rbind") %:%
-                foreach(sim_runs = 1:100, .combine = "rbind") %dopar%
+                foreach(n = c(25, 50, 100, 200,  500, 1000), .combine = "rbind") %:%
+                foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
                 {
                   seed <- round(runif(1, min = 0, max = n) * 1000, digits = 0)
                   data_cfa <- lavaan::simulateData(model = model_list[[jj]],
