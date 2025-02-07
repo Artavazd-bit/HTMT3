@@ -56,7 +56,7 @@ model_est <- '
 
 
 
-data_cfa <- lavaan::simulateData(model = model_dgp2, 
+data_cfa <- lavaan::simulateData(model = model_dgp_1, 
                             model.type = "cfa",
                             meanstructure = FALSE, # means of observed variables enter the model
                             int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
@@ -71,7 +71,7 @@ data_cfa <- lavaan::simulateData(model = model_dgp2,
                             auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
                             auto.cov.lv.x = FALSE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
                             auto.cov.y = FALSE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
-                            sample.nobs = 25, # Number of observations.
+                            sample.nobs = 20, # Number of observations.
                             ov.var = NULL,# The user-specified variances of the observed variables.
                             group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
                             skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
