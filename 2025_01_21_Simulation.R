@@ -42,8 +42,8 @@ model_dgp_2 <- '
                 xi_1 ~~ 1*xi_1 + 0.5*xi_2
                 xi_2 ~~ 1*xi_2
               ' 
-corr_vector <- c(1, 0.5)
-model_list <- list(model_dgp_1, model_dgp_2)
+model_type <- list("high_1", "low_1", "high_high", "low_high", "high_low", "low_low")
+model_list <- list(model_high_1, model_low_1, model_high_high, model_low_high, model_high_low, model_low_low)
 
 model_est <- '
               #  latent variables
@@ -55,7 +55,7 @@ model_est <- '
 
 HTMT_function <- function(data, indices){
   d <- data[indices,]
-  output <- calc_htmt(data = d, model = model_est, latent1 = "xi_1", "xi_2", scale = TRUE, htmt2 = FALSE)
+  output <- calc_htmt(data = d, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE, htmt2 = FALSE)
   return(output)
 }
 
@@ -63,7 +63,7 @@ cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
 sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
-                foreach(n = c(12, 25, 50, 100, 200,  500, 1000), .combine = "rbind") %:%
+                foreach(n = c(1000), .combine = "rbind") %:%
                 foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
                 {
                   seed <- round(runif(1, min = 0, max = n) * 1000, digits = 0)
@@ -111,12 +111,12 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                   #Bootstrapping
                   #bootstrap <- boot(data_cfa, HTMT_function, R = 100, seed = seed)
                   set.seed(6064)
-                  bootstrap <- boot(data_cfa, function(data, indices){calc_htmt(data = data[indices,], model = model_est, latent1 = "xi_1", "xi_2", scale = TRUE, htmt2 = FALSE)}, R = 500)
+                  bootstrap <- boot(data_cfa, function(data, indices){calc_htmt(data = data[indices,], model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE, htmt2 = FALSE)}, R = 500)
                   bootstrap_htmt_1_se <- sd(na.omit(bootstrap$t))
                   bootstrap_htmt_1_bias <- bootstrap$t0 - mean(na.omit(bootstrap$t))
                   t_value_htmt_1_bootstrap <- (gradient_htmt_1$HTMT - 1) / bootstrap_htmt_1_se
                   
-                  save <- data.frame( true_corr = corr_vector[jj],
+                  save <- data.frame( model_type = model_type[[jj]],
                                       n = n,
                                       sim_runs,
                                       htmt_1 = gradient_htmt_1$HTMT,
@@ -145,7 +145,7 @@ sim_overview_without_NA <- sim_overview[complete.cases(sim_overview[,"se_htmt_2"
 sim_overview_without_NA <- na.omit(sim_overview)
 
 sim_overview_2 <- sim_overview %>% 
-  group_by(true_corr, n) %>%
+  group_by(model_type, n) %>%
   summarize(Rejection_rate_htmt_1= mean(t_test_htmt_1), 
             #Rejection_rate_htmt_2 = mean(t_test_htmt_2), 
             Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot))
