@@ -18,12 +18,6 @@ model_est <- '
                 xi_1 ~~ xi_2
               ' 
 
-HTMT_function <- function(data, indices){
-  d <- data[indices,]
-  output <- calc_htmt(data = d, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE, htmt2 = FALSE)
-  return(output)
-}
-
 cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
