@@ -10,41 +10,6 @@ library(boot)
 source("2024_01_08_functions.R")
 source("2024_01_10_gradient_analytically_of_htmt.R")
 
-
-model_dgp_1 <- '
-              #  latent variables
-                xi_1 =~ 0.8*x11 + 0.8*x12 + 0.8*x13
-                xi_2 =~ 0.7*x21 + 0.7*x22 + 0.7*x23 + 0.7*x24
-                x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
-                x12 ~~ 1*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
-                x13 ~~ 1*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
-                x21 ~~ 1*x21 + 0*x22 + 0*x23 + 0*x24
-                x22 ~~ 1*x22 + 0*x23 + 0*x24
-                x23 ~~ 1*x23 + 0*x24
-                x24 ~~ 1*x24
-              #  fix covariances between xi_1 and xi_2 und setze die Varianz auf 1
-                xi_1 ~~ 1*xi_1 + 1*xi_2
-                xi_2 ~~ 1*xi_2
-              ' 
-
-model_dgp_2 <- '
-              #  latent variables
-                xi_1 =~ 0.8*x11 + 0.8*x12 + 0.8*x13
-                xi_2 =~ 0.7*x21 + 0.7*x22 + 0.7*x23 + 0.7*x24
-                x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
-                x12 ~~ 1*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
-                x13 ~~ 1*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
-                x21 ~~ 1*x21 + 0*x22 + 0*x23 + 0*x24
-                x22 ~~ 1*x22 + 0*x23 + 0*x24
-                x23 ~~ 1*x23 + 0*x24
-                x24 ~~ 1*x24
-              #  fix covariances between xi_1 and xi_2
-                xi_1 ~~ 1*xi_1 + 0.5*xi_2
-                xi_2 ~~ 1*xi_2
-              ' 
-model_type <- list("high_1", "low_1", "high_high", "low_high", "high_low", "low_low")
-model_list <- list(model_high_1, model_low_1, model_high_high, model_low_high, model_high_low, model_low_low)
-
 model_est <- '
               #  latent variables
                 xi_1 =~ x11 + x12 + x13
@@ -63,7 +28,7 @@ cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
 sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
-                foreach(n = c(1000), .combine = "rbind") %:%
+                foreach(n = c(25, 50, 100, 200, 500, 1000), .combine = "rbind") %:%
                 foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
                 {
                   seed <- round(runif(1, min = 0, max = n) * 1000, digits = 0)
