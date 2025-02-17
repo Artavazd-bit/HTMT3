@@ -22,10 +22,11 @@ cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
 sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
-                foreach(n = c(25, 50, 100, 200, 500, 1000), .combine = "rbind") %:%
-                foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
+                foreach(n = c(200, 500, 1000), .combine = "rbind") %:%
+                foreach(sim_runs = 1:3, .combine = "rbind") %dopar%
                 {
-                  seed <- round(runif(1, min = 0, max = n) * 1000, digits = 0)
+                  seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
+                  # sample.int(7489217391, 1)
                   data_cfa <- lavaan::simulateData(model = model_list[[jj]],
                                                    model.type = "cfa",
                                                    meanstructure = FALSE, # means of observed variables enter the model
@@ -69,7 +70,7 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                   
                   #Bootstrapping
                   #bootstrap <- boot(data_cfa, HTMT_function, R = 100, seed = seed)
-                  set.seed(6064)
+                  set.seed(seed)
                   bootstrap <- boot(data_cfa, function(data, indices){calc_htmt(data = data[indices,], model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE, htmt2 = FALSE)}, R = 500)
                   bootstrap_htmt_1_se <- sd(na.omit(bootstrap$t))
                   bootstrap_htmt_1_bias <- bootstrap$t0 - mean(na.omit(bootstrap$t))

@@ -125,8 +125,12 @@ model_05_low_low <- '
 model_type <- list("1_high_low", "1_high_high", "1_low_high", "1_low_low", 
                    "05_high_low", "05_high_high" , "05_low_high", "05_low_low")
 
-model_list <- list(model_1_high_low, model_1_high_high, 
-                   model_1_low_high, model_1_low_low, 
-                   model_05_high_low, model_05_high_high , 
-                   model_05_low_high, model_05_low_low)
+model_list <- list("1_high_low" = model_1_high_low, 
+                   "1_high_high" = model_1_high_high, 
+                   "1_low_high" = model_1_low_high, 
+                   "1_low_low" = model_1_low_low, 
+                   "05_high_low" = model_05_high_low, 
+                   "05_high_high" = model_05_high_high , 
+                   "05_low_high" = model_05_low_high, 
+                   "05_low_low" = model_05_low_low)
 
