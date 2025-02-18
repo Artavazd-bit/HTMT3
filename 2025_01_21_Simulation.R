@@ -68,6 +68,8 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                   t_value_htmt_1 = (gradient_htmt_1$HTMT - 1)/se_htmt_1
                   #t_value_htmt_2 = (gradient_htmt_2$HTMT2 - 1)/se_htmt_2
                   
+                  CI_HTMT = gradient_htmt_1$HTMT + qnorm(0.05) * se_htmt_1 
+                  
                   #Bootstrapping
                   #bootstrap <- boot(data_cfa, HTMT_function, R = 100, seed = seed)
                   set.seed(seed)
@@ -82,12 +84,15 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                                       htmt_1 = gradient_htmt_1$HTMT,
                                       se_htmt_1_delta = se_htmt_1,
                                       t_value_htmt_1 = t_value_htmt_1,
-                                      t_test_htmt_1 = t_value_htmt_1 < qnorm(0.05),
+                                      t_test_htmt_1 = t_value_htmt_1 <  qt(p = 0.05, df = 99),
+                                      CI_HTMT_90 = CI_HTMT,
+                                      CI_HTMT_90_test = CI_HTMT >= 1,
+                                      
                                       
                                       se_htmt_1_boot =  bootstrap_htmt_1_se,
                                       boot_htmt_1_bias = bootstrap_htmt_1_bias, 
                                       t_value_htmt_1_boot = t_value_htmt_1_bootstrap, 
-                                      t_test_htmt_1_boot = t_value_htmt_1_bootstrap < qnorm(0.05),
+                                      t_test_htmt_1_boot = t_value_htmt_1_bootstrap <  qt(p = 0.05, df = 99),
                                       seed = seed
                                       
                                       #htmt_2 = gradient_htmt_2$HTMT2,
