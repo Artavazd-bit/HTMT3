@@ -56,7 +56,7 @@ model_est <- '
 
 
 
-data_cfa <- lavaan::simulateData(model = model_1_high_low, 
+data_cfa <- lavaan::simulateData(model = model_99, 
                             model.type = "cfa",
                             meanstructure = FALSE, # means of observed variables enter the model
                             int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero

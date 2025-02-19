@@ -1,5 +1,6 @@
 # model_corr_magnitude_variability
-model_1_high_low <- '
+# with 3 and 4 measurement variables
+model_1_high_low_3_4 <- '
                 xi_1 =~ 0.8*x11 + 0.8*x12 + 0.8*x13
                 xi_2 =~ 0.7*x21 + 0.7*x22 + 0.7*x23 + 0.7*x24
                 x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
@@ -14,7 +15,7 @@ model_1_high_low <- '
                 xi_2 ~~ 1*xi_2
               ' 
 
-model_1_high_high <- '
+model_1_high_high_3_4 <- '
                 xi_1 =~ 0.9*x11 + 0.9*x12 + 0.9*x13
                 xi_2 =~ 0.3*x21 + 0.3*x22 + 0.3*x23 + 0.3*x24
                 x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
@@ -30,7 +31,7 @@ model_1_high_high <- '
               ' 
 
 
-model_1_low_high <- '
+model_1_low_high_3_4 <- '
                 xi_1 =~ 0.4*x11 + 0.4*x12 + 0.4*x13
                 xi_2 =~ 0.7*x21 + 0.7*x22 + 0.7*x23 + 0.7*x24
                 x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
@@ -45,7 +46,7 @@ model_1_low_high <- '
                 xi_2 ~~ 1*xi_2
               ' 
 
-model_1_low_low <- '
+model_1_low_low_3_4 <- '
                 xi_1 =~ 0.3*x11 + 0.3*x12 + 0.3*x13
                 xi_2 =~ 0.4*x21 + 0.4*x22 + 0.4*x23 + 0.4*x24
                 x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
@@ -61,7 +62,7 @@ model_1_low_low <- '
               ' 
 
 ######################################################
-model_05_high_low <- '
+model_05_high_low_3_4 <- '
                 xi_1 =~ 0.8*x11 + 0.8*x12 + 0.8*x13
                 xi_2 =~ 0.7*x21 + 0.7*x22 + 0.7*x23 + 0.7*x24
                 x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
@@ -76,7 +77,7 @@ model_05_high_low <- '
                 xi_2 ~~ 1*xi_2
               ' 
 
-model_05_high_high <- '
+model_05_high_high_3_4 <- '
                 xi_1 =~ 0.9*x11 + 0.9*x12 + 0.9*x13
                 xi_2 =~ 0.3*x21 + 0.3*x22 + 0.3*x23 + 0.3*x24
                 x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
@@ -92,7 +93,7 @@ model_05_high_high <- '
               ' 
 
 
-model_05_low_high <- '
+model_05_low_high_3_4 <- '
                 xi_1 =~ 0.4*x11 + 0.4*x12 + 0.4*x13
                 xi_2 =~ 0.7*x21 + 0.7*x22 + 0.7*x23 + 0.7*x24
                 x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
@@ -107,7 +108,7 @@ model_05_low_high <- '
                 xi_2 ~~ 1*xi_2
               ' 
 
-model_05_low_low <- '
+model_05_low_low_3_4 <- '
                 xi_1 =~ 0.3*x11 + 0.3*x12 + 0.3*x13
                 xi_2 =~ 0.4*x21 + 0.4*x22 + 0.4*x23 + 0.4*x24
                 x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
@@ -122,15 +123,13 @@ model_05_low_low <- '
                 xi_2 ~~ 1*xi_2
               ' 
 ######################################################
-model_type <- list("1_high_low", "1_high_high", "1_low_high", "1_low_low", 
-                   "05_high_low", "05_high_high" , "05_low_high", "05_low_low")
 
-model_list <- list("1_high_low" = model_1_high_low, 
-                   "1_high_high" = model_1_high_high, 
-                   "1_low_high" = model_1_low_high, 
-                   "1_low_low" = model_1_low_low, 
-                   "05_high_low" = model_05_high_low, 
-                   "05_high_high" = model_05_high_high , 
-                   "05_low_high" = model_05_low_high, 
-                   "05_low_low" = model_05_low_low)
+model_list_3_4 <- list("1_high_low_3_4" = model_1_high_low_3_4, 
+                   "1_high_high_3_4" = model_1_high_high_3_4, 
+                   "1_low_high_3_4" = model_1_low_high_3_4, 
+                   "1_low_low_3_4" = model_1_low_low_3_4, 
+                   "05_high_low_3_4" = model_05_high_low_3_4, 
+                   "05_high_high_3_4" = model_05_high_high_3_4 , 
+                   "05_low_high_3_4" = model_05_low_high_3_4, 
+                   "05_low_low_3_4" = model_05_low_low_3_4)
 

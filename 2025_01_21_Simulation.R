@@ -22,7 +22,7 @@ cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
 sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
-                foreach(n = c(200, 500, 1000), .combine = "rbind") %:%
+                foreach(n = c(25, 50, 100, 200, 500, 1000), .combine = "rbind") %:%
                 foreach(sim_runs = 1:3, .combine = "rbind") %dopar%
                 {
                   seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
@@ -70,7 +70,7 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                   
                   alpha_one_sided <- 0.05
                   df <- n - 1
-                  CI_HTMT = gradient_htmt_1$HTMT + qt(p = 1-alpha_one_sided/2, df = df) * se_htmt_1
+                  CI_HTMT_upper = gradient_htmt_1$HTMT + qt(p = 1-alpha_one_sided/2, df = df) * se_htmt_1
                   
                   #Bootstrapping
                   #bootstrap <- boot(data_cfa, HTMT_function, R = 100, seed = seed)
@@ -80,15 +80,15 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                   bootstrap_htmt_1_bias <- bootstrap$t0 - mean(na.omit(bootstrap$t))
                   t_value_htmt_1_bootstrap <- (gradient_htmt_1$HTMT - 1) / bootstrap_htmt_1_se
                   
-                  save <- data.frame( model_type = model_type[[jj]],
+                  save <- data.frame( model_type = names(model_list)[[jj]],
                                       n = n,
                                       sim_runs,
                                       htmt_1 = gradient_htmt_1$HTMT,
                                       se_htmt_1_delta = se_htmt_1,
                                       t_value_htmt_1 = t_value_htmt_1,
                                       t_test_htmt_1 = t_value_htmt_1 <  qt(p = alpha_one_sided, df = df),
-                                      CI_HTMT_90 = CI_HTMT,
-                                      CI_HTMT_90_test = CI_HTMT >= 1,
+                                      CI_HTMT_90 = CI_HTMT_upper,
+                                      CI_HTMT_90_test = CI_HTMT_upper >= 1,
                                       
                                       se_htmt_1_boot =  bootstrap_htmt_1_se,
                                       boot_htmt_1_bias = bootstrap_htmt_1_bias, 
