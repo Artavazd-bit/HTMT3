@@ -330,3 +330,19 @@ model_list <- list("1_high_low" = model_1_high_low,
                    "09_low_high" = model_09_low_high, 
                    "09_low_low" = model_09_low_low)
 
+coefs <- c(seq(-1,1,0.1))
+coefs
+loadings <- combn(coefs, 2)
+loadings
+errorvar <- (1-loadings^2)
+errorvar
+simModels <- foreach(i = 1:ncol(loadings)) %do% {
+  simCommonFactor <- paste(paste("xi =~ ",loadings[1,i],"*x1 + ",loadings[2,i],"*x2 + 1*x3 + 1*x4"),"\n",
+                           paste("xi ~~ 1*xi"),"\n",
+                           paste("x1 ~~",errorvar[1,i],"*x1 + 0*x2 + 0*x3 + 0*x4"),"\n",
+                           paste("x2 ~~",errorvar[2,i],"*x2 + 0*x3 + 0*x4"),"\n",
+                           paste("x3 ~~ 1*x3 + 0*x4"),"\n",
+                           paste("x4 ~~ 1*x4"),"\n")
+  return(simCommonFactor)
+}
+
