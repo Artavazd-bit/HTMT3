@@ -134,7 +134,7 @@ htmt2_ana_cor <- calc_grad_htmt2_ana(data = data_cfa, model = model_est, latent1
 htmt_ana_cov <- calc_grad_htmt_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE)
 htmt2_ana_cov <- calc_grad_htmt2_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE)
 
-sqrt(diag( gr %*% vc_r %*% t(gr)))
+sqrt(t(htmt_ana_cor$output$gradient) %*% vc_r %*% htmt_ana_cor$output$gradient / n)
 
 # i want to test if i'm siginificantly from 1 different, no ? 
 (htmt[1,2] - 1)/sqrt(gr %*% vc_r %*% t(gr))
