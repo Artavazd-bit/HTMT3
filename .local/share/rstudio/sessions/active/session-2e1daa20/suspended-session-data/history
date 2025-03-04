@@ -1,0 +1,512 @@
+loadings[1,1]
+loadings[1,1]
+loadings[2,1]
+simModels <- foreach(i = 1:ncol(loadings)) %do% {
+simCommonFactor <- paste(paste("xi_1 =~ ",loadings[1,i],"*x1 + ",loadings[1,i],"*x2 + ",loadings[1,i], "*x3 +",  loadings[1,i], "*x4"),"\n",
+paste("xi_2 =~ ",loadings[2,i],"*x1 + ",loadings[2,i],"*x2 + ",loadings[2,i], "*x3"), "\n",
+paste("xi ~~ 1*xi"),"\n",
+paste("x1 ~~",errorvar[1,i],"*x1 + 0*x2 + 0*x3 + 0*x4"),"\n",
+paste("x2 ~~",errorvar[2,i],"*x2 + 0*x3 + 0*x4"),"\n",
+paste("x3 ~~ 1*x3 + 0*x4"),"\n",
+paste("x4 ~~ 1*x4"),"\n")
+return(simCommonFactor)
+}
+library(doParallel)
+library(foreach)
+simModels <- foreach(i = 1:ncol(loadings)) %do% {
+simCommonFactor <- paste(paste("xi_1 =~ ",loadings[1,i],"*x1 + ",loadings[1,i],"*x2 + ",loadings[1,i], "*x3 +",  loadings[1,i], "*x4"),"\n",
+paste("xi_2 =~ ",loadings[2,i],"*x1 + ",loadings[2,i],"*x2 + ",loadings[2,i], "*x3"), "\n",
+paste("xi ~~ 1*xi"),"\n",
+paste("x1 ~~",errorvar[1,i],"*x1 + 0*x2 + 0*x3 + 0*x4"),"\n",
+paste("x2 ~~",errorvar[2,i],"*x2 + 0*x3 + 0*x4"),"\n",
+paste("x3 ~~ 1*x3 + 0*x4"),"\n",
+paste("x4 ~~ 1*x4"),"\n")
+return(simCommonFactor)
+}
+coefs <- c(0.3, 0.4, 0.7, 0.8, 0.9)
+loadings <- combn(coefs, 2)
+errorvar <- (1-loadings^2)
+simModels <- foreach(i = 1:ncol(loadings)) %do% {
+simCommonFactor <- paste(paste("xi_1 =~ ",loadings[1,i],"*x1 + ",loadings[1,i],"*x2 + ",loadings[1,i], "*x3 +",  loadings[1,i], "*x4"),"\n",
+paste("xi_2 =~ ",loadings[2,i],"*x1 + ",loadings[2,i],"*x2 + ",loadings[2,i], "*x3"), "\n",
+paste("xi ~~ 1*xi"),"\n",
+paste("x1 ~~",errorvar[1,i],"*x1 + 0*x2 + 0*x3 + 0*x4"),"\n",
+paste("x2 ~~",errorvar[2,i],"*x2 + 0*x3 + 0*x4"),"\n",
+paste("x3 ~~ 1*x3 + 0*x4"),"\n",
+paste("x4 ~~ 1*x4"),"\n")
+return(simCommonFactor)
+}
+simCommonFactor
+simModels
+simModels[[1]]
+data_cfa <- lavaan::simulateData(model = simModels[[1]],
+model.type = "cfa",
+meanstructure = FALSE, # means of observed variables enter the model
+int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
+int.lv.free = FALSE, # if false, intercepts of latent var fixed to zero
+marker.int.zero = FALSE, # only relevant, if the metric of each latent var is set by fixing the first factor loading to unity
+conditional.x = FALSE, # If TRUE, we set up the model on the exogenous "x" covariates, the model implied sample statistics only include the non-x variables. If FALSE x are modelled jointly with the other variables and the model implied statistics reflect both sets of variables.
+fixed.x = FALSE, # if TRUE, ex x are considered fixed
+orthogonal = FALSE, # if TRUE exogenous latent variables are assumed to be uncorrelated
+std.lv = TRUE, # If TRUE, the metric of each latent variable is determined by fixing their variances to 1.0. If FALSE, the metric of each latent variable is determined by fixing the factor loading of the first indicator to 1.0.
+auto.fix.first = FALSE, # If TRUE, the factor loading of the first indicator is set to 1.0 for every latent variable
+auto.fix.single = FALSE, # If TRUE, the residual variance (if included) of an observed indicator is set to zero if it is the only indicator of a latent variable.
+auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
+auto.cov.lv.x = FALSE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
+auto.cov.y = FALSE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
+sample.nobs = 12, # Number of observations.
+ov.var = NULL,# The user-specified variances of the observed variables.
+group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
+skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
+kurtosis = NULL, # Numeric vector. The kurtosis values for the observed variables. Defaults to zero.
+seed = NULL, # Set random seed.
+empirical = FALSE, # Logical. If TRUE, the implied moments (Mu and Sigma) specify the empirical not population mean and covariance matrix.
+return.type = "data.frame",
+return.fit = FALSE, # If TRUE, return the fitted model that has been used to generate the data as an attribute (called "fit"); this may be useful for inspection.
+debug = FALSE, # If TRUE, debugging information is displayed.
+standardized = FALSE # If TRUE, the residual variances of the observed variables are set in such a way such that the model implied variances are unity. This allows regression coefficients and factor loadings (involving observed variables) to be specified in a standardized metric.
+)
+data_cfa
+errorvar
+loadings <- combn(loadings, correlation)
+correlation <- c(0.5, 0.7, 0.8, 0.9, 1)
+loadings <- combn(loadings, correlation)
+install.packages(gtools)
+install.packages("gtools")
+permutations(loadings, correlation)
+library(gtools)
+gtools::permutations(loadings, correlation)
+expand.grid(loadings, correlation)
+coefs <- c(0.3, 0.4, 0.7, 0.8, 0.9)
+loadings <- combn(coefs, 2)
+loadings
+type(loadings)
+coefs <- c(0.3, 0.4, 0.7, 0.8, 0.9)
+loadings <- combn(coefs, 2)
+correlation <- c(0.5, 0.7, 0.8, 0.9, 1)
+loadings <- combn(loadings, )
+errorvar <- (1-loadings^2)
+simModels <- foreach(i = 1:ncol(loadings)) %:%
+foreach(j %in% correlation){
+simModels <- foreach(i = 1:ncol(loadings)) %:%
+foreach(j = correlation){
+coefs <- c(0.3, 0.4, 0.7, 0.8, 0.9)
+loadings <- combn(coefs, 2)
+correlation <- c(0.5, 0.7, 0.8, 0.9, 1)
+loadings <- combn(loadings, )
+errorvar <- (1-loadings^2)
+simModels <- foreach(i = 1:ncol(loadings)) %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1)){
+simModels <- foreach(i = 1:ncol(loadings)) %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1)) %do%
+{
+simCommonFactor <- paste(paste("xi_1 =~ ",loadings[1,i],"*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n",
+paste("xi_2 =~ ",loadings[2,i],"*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n",
+paste("xi ~~ 1*xi + ", j, "*xi_2"),"\n",
+paste("x11 ~~",errorvar[1,i],"*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x12 ~~",errorvar[1,i],"*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x13 ~~",errorvar[1,i],"*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x14 ~~",errorvar[1,i],"*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x21 ~~",errorvar[2,i],"*x21 + 0*x22 + 0*x23"),"\n",
+paste("x22 ~~",errorvar[2,i],"*x22 + 0*x23"),"\n",
+paste("x23 ~~",errorvar[2,i],"*x23"),"\n",
+)
+return(simCommonFactor)
+}
+simModels <- foreach(i = 1:ncol(loadings), combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), combine = "rbind") %do%
+{
+simCommonFactor <- paste(paste("xi_1 =~ ",loadings[1,i],"*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n",
+paste("xi_2 =~ ",loadings[2,i],"*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n",
+paste("xi ~~ 1*xi + ", j, "*xi_2"),"\n",
+paste("x11 ~~",errorvar[1,i],"*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x12 ~~",errorvar[1,i],"*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x13 ~~",errorvar[1,i],"*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x14 ~~",errorvar[1,i],"*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x21 ~~",errorvar[2,i],"*x21 + 0*x22 + 0*x23"),"\n",
+paste("x22 ~~",errorvar[2,i],"*x22 + 0*x23"),"\n",
+paste("x23 ~~",errorvar[2,i],"*x23"),"\n",
+)
+}
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <- paste(paste("xi_1 =~ ",loadings[1,i],"*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n",
+paste("xi_2 =~ ",loadings[2,i],"*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n",
+paste("xi ~~ 1*xi + ", j, "*xi_2"),"\n",
+paste("x11 ~~",errorvar[1,i],"*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x12 ~~",errorvar[1,i],"*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x13 ~~",errorvar[1,i],"*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x14 ~~",errorvar[1,i],"*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x21 ~~",errorvar[2,i],"*x21 + 0*x22 + 0*x23"),"\n",
+paste("x22 ~~",errorvar[2,i],"*x22 + 0*x23"),"\n",
+paste("x23 ~~",errorvar[2,i],"*x23"),"\n",
+)
+simCommonFactor
+}
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i],"*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n",
+paste("xi_2 =~ ",loadings[2,i],"*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n",
+paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n",
+, "xi_2 ~~ 1*xi_2 \n",
+paste("x11 ~~", errorvar[1,i],"*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x12 ~~", errorvar[1,i],"*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x13 ~~", errorvar[1,i],"*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x14 ~~", errorvar[1,i],"*x14 + 0*x21 + 0*x22 + 0*x23"),"\n",
+paste("x21 ~~", errorvar[2,i],"*x21 + 0*x22 + 0*x23"),"\n",
+paste("x22 ~~", errorvar[2,i],"*x22 + 0*x23"),"\n",
+paste("x23 ~~", errorvar[2,i],"*x23"),"\n"
+)
+simCommonFactor
+}
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i],"*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i],"*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i],"*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i],"*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i],"*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i],"*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i],"*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i],"*x22 + 0*x23"),"\n"
+#, paste("x23 ~~", errorvar[2,i],"*x23"),"\n"
+)
+simCommonFactor
+}
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i], "*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i], "*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i], "*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i], "*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i], "*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i], "*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i], "*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i], "*x22 + 0*x23"),"\n"
+, paste("x23 ~~", errorvar[2,i], "*x23"), "\n"
+)
+simCommonFactor
+}
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i], "*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i], "*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i], "*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i], "*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i], "*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i], "*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i], "*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i], "*x22 + 0*x23"),"\n"
+, paste("x23 ~~", errorvar[2,i], "*x23"), "\n"
+)
+simCommonFactor
+}
+simModels
+simModels[[2]]
+simModels[[3]]
+simModels[[5]]
+simModels[[9]]
+data_frame <- data.frame()
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i], "*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i], "*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i], "*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i], "*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i], "*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i], "*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i], "*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i], "*x22 + 0*x23"),"\n"
+, paste("x23 ~~", errorvar[2,i], "*x23"), "\n"
+)
+data_frame$models <- simCommonFactor
+data_frame
+}
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i], "*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i], "*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i], "*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i], "*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i], "*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i], "*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i], "*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i], "*x22 + 0*x23"),"\n"
+, paste("x23 ~~", errorvar[2,i], "*x23"), "\n"
+)
+data_frame$models[ii] <- simCommonFactor
+ii <- ii + 1
+data_frame
+}
+ii <- 1
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i], "*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i], "*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i], "*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i], "*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i], "*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i], "*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i], "*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i], "*x22 + 0*x23"),"\n"
+, paste("x23 ~~", errorvar[2,i], "*x23"), "\n"
+)
+data_frame$models[ii] <- simCommonFactor
+ii <- ii + 1
+data_frame
+}
+ii <- 1
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i], "*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i], "*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i], "*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i], "*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i], "*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i], "*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i], "*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i], "*x22 + 0*x23"),"\n"
+, paste("x23 ~~", errorvar[2,i], "*x23"), "\n"
+)
+data_frame$loading_1[ii] <- loadings[1,i]
+data_frame$loading_2[ii] <- loadings[2,i]
+data_frame$corr[ii] <- j
+data_frame$models[ii] <- simCommonFactor
+ii <- ii + 1
+data_frame
+}
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i], "*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i], "*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i], "*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i], "*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i], "*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i], "*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i], "*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i], "*x22 + 0*x23"),"\n"
+, paste("x23 ~~", errorvar[2,i], "*x23"), "\n"
+)
+save <- data_frame(
+loading_1 = loadings[1,i],
+loading_2 = loadings[2,i],
+correlation = j,
+model = simCommonFactor
+)
+save
+}
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i], "*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i], "*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i], "*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i], "*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i], "*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i], "*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i], "*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i], "*x22 + 0*x23"),"\n"
+, paste("x23 ~~", errorvar[2,i], "*x23"), "\n"
+)
+save <- data.frame(
+loading_1 = loadings[1,i],
+loading_2 = loadings[2,i],
+correlation = j,
+model = simCommonFactor
+)
+save
+}
+simModels
+simModels$loading_1
+View(simModels)
+simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
+foreach(j = c(0.5, 0.7, 0.8, 0.9, 1), .combine = "rbind") %do%
+{
+simCommonFactor <-
+paste(
+paste("xi_1 =~ ",loadings[1,i], "*x11 + ",loadings[1,i],"*x12 + ",loadings[1,i], "*x13 +",  loadings[1,i], "*x14"),"\n"
+, paste("xi_2 =~ ",loadings[2,i], "*x21 + ",loadings[2,i],"*x22 + ",loadings[2,i], "*x23"), "\n"
+, paste("xi_1 ~~ 1*xi_1 + ", j, "*xi_2"),"\n"
+, "xi_2 ~~ 1*xi_2 \n"
+, paste("x11 ~~", errorvar[1,i], "*x11 + 0*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x12 ~~", errorvar[1,i], "*x12 + 0*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x13 ~~", errorvar[1,i], "*x13 + 0*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x14 ~~", errorvar[1,i], "*x14 + 0*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x21 ~~", errorvar[2,i], "*x21 + 0*x22 + 0*x23"),"\n"
+, paste("x22 ~~", errorvar[2,i], "*x22 + 0*x23"),"\n"
+, paste("x23 ~~", errorvar[2,i], "*x23"), "\n"
+)
+save <- data.frame(
+loading_1 = loadings[1,i],
+loading_2 = loadings[2,i],
+correlation = j,
+model = simCommonFactor
+)
+save
+}
+simModels$model[1]
+data_cfa <- lavaan::simulateData(model = simModels$model[1],
+model.type = "cfa",
+meanstructure = FALSE, # means of observed variables enter the model
+int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
+int.lv.free = FALSE, # if false, intercepts of latent var fixed to zero
+marker.int.zero = FALSE, # only relevant, if the metric of each latent var is set by fixing the first factor loading to unity
+conditional.x = FALSE, # If TRUE, we set up the model on the exogenous "x" covariates, the model implied sample statistics only include the non-x variables. If FALSE x are modelled jointly with the other variables and the model implied statistics reflect both sets of variables.
+fixed.x = FALSE, # if TRUE, ex x are considered fixed
+orthogonal = FALSE, # if TRUE exogenous latent variables are assumed to be uncorrelated
+std.lv = TRUE, # If TRUE, the metric of each latent variable is determined by fixing their variances to 1.0. If FALSE, the metric of each latent variable is determined by fixing the factor loading of the first indicator to 1.0.
+auto.fix.first = FALSE, # If TRUE, the factor loading of the first indicator is set to 1.0 for every latent variable
+auto.fix.single = FALSE, # If TRUE, the residual variance (if included) of an observed indicator is set to zero if it is the only indicator of a latent variable.
+auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
+auto.cov.lv.x = FALSE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
+auto.cov.y = FALSE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
+sample.nobs = 25, # Number of observations.
+ov.var = NULL,# The user-specified variances of the observed variables.
+group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
+skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
+kurtosis = NULL, # Numeric vector. The kurtosis values for the observed variables. Defaults to zero.
+seed = NULL, # Set random seed.
+empirical = FALSE, # Logical. If TRUE, the implied moments (Mu and Sigma) specify the empirical not population mean and covariance matrix.
+return.type = "data.frame",
+return.fit = FALSE, # If TRUE, return the fitted model that has been used to generate the data as an attribute (called "fit"); this may be useful for inspection.
+debug = FALSE, # If TRUE, debugging information is displayed.
+standardized = FALSE # If TRUE, the residual variances of the observed variables are set in such a way such that the model implied variances are unity. This allows regression coefficients and factor loadings (involving observed variables) to be specified in a standardized metric.
+)
+data_cfa
+model_est <- '
+#  latent variables
+xi_1 =~ x11 + x12 + x13
+xi_2 =~ x21 + x22 + x23
+xi_1 ~~ xi_2
+'
+model_est <- '
+#  latent variables
+xi_1 =~ x11 + x12 + x13 + x14
+xi_2 =~ x21 + x22 + x23
+xi_1 ~~ xi_2
+'
+# first i want to see how the data fits the model
+fit_cfa <- lavaan::cfa(model  = model_est,
+data = data_cfa
+)
+data_cfa <- lavaan::simulateData(model = simModels$model[1],
+model.type = "cfa",
+meanstructure = FALSE, # means of observed variables enter the model
+int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
+int.lv.free = FALSE, # if false, intercepts of latent var fixed to zero
+marker.int.zero = FALSE, # only relevant, if the metric of each latent var is set by fixing the first factor loading to unity
+conditional.x = FALSE, # If TRUE, we set up the model on the exogenous "x" covariates, the model implied sample statistics only include the non-x variables. If FALSE x are modelled jointly with the other variables and the model implied statistics reflect both sets of variables.
+fixed.x = FALSE, # if TRUE, ex x are considered fixed
+orthogonal = FALSE, # if TRUE exogenous latent variables are assumed to be uncorrelated
+std.lv = TRUE, # If TRUE, the metric of each latent variable is determined by fixing their variances to 1.0. If FALSE, the metric of each latent variable is determined by fixing the factor loading of the first indicator to 1.0.
+auto.fix.first = FALSE, # If TRUE, the factor loading of the first indicator is set to 1.0 for every latent variable
+auto.fix.single = FALSE, # If TRUE, the residual variance (if included) of an observed indicator is set to zero if it is the only indicator of a latent variable.
+auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
+auto.cov.lv.x = FALSE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
+auto.cov.y = FALSE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
+sample.nobs = 100, # Number of observations.
+ov.var = NULL,# The user-specified variances of the observed variables.
+group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
+skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
+kurtosis = NULL, # Numeric vector. The kurtosis values for the observed variables. Defaults to zero.
+seed = NULL, # Set random seed.
+empirical = FALSE, # Logical. If TRUE, the implied moments (Mu and Sigma) specify the empirical not population mean and covariance matrix.
+return.type = "data.frame",
+return.fit = FALSE, # If TRUE, return the fitted model that has been used to generate the data as an attribute (called "fit"); this may be useful for inspection.
+debug = FALSE, # If TRUE, debugging information is displayed.
+standardized = FALSE # If TRUE, the residual variances of the observed variables are set in such a way such that the model implied variances are unity. This allows regression coefficients and factor loadings (involving observed variables) to be specified in a standardized metric.
+)
+# first i want to see how the data fits the model
+fit_cfa <- lavaan::cfa(model  = model_est,
+data = data_cfa
+)
+fit_cfa
+summary(fit_cfa)
+summarze(fit_cfa)
+summary(fit_cfa, fit.measures = TRUE)
+lavaan::summary(fit_cfa, fit.measures = TRUE)
+simModels$model[1]
+data_cfa <- lavaan::simulateData(model = simModels$model[1],
+model.type = "cfa",
+meanstructure = FALSE, # means of observed variables enter the model
+int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
+int.lv.free = FALSE, # if false, intercepts of latent var fixed to zero
+marker.int.zero = FALSE, # only relevant, if the metric of each latent var is set by fixing the first factor loading to unity
+conditional.x = FALSE, # If TRUE, we set up the model on the exogenous "x" covariates, the model implied sample statistics only include the non-x variables. If FALSE x are modelled jointly with the other variables and the model implied statistics reflect both sets of variables.
+fixed.x = FALSE, # if TRUE, ex x are considered fixed
+orthogonal = FALSE, # if TRUE exogenous latent variables are assumed to be uncorrelated
+std.lv = TRUE, # If TRUE, the metric of each latent variable is determined by fixing their variances to 1.0. If FALSE, the metric of each latent variable is determined by fixing the factor loading of the first indicator to 1.0.
+auto.fix.first = FALSE, # If TRUE, the factor loading of the first indicator is set to 1.0 for every latent variable
+auto.fix.single = FALSE, # If TRUE, the residual variance (if included) of an observed indicator is set to zero if it is the only indicator of a latent variable.
+auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
+auto.cov.lv.x = FALSE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
+auto.cov.y = FALSE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
+sample.nobs = 100, # Number of observations.
+ov.var = NULL,# The user-specified variances of the observed variables.
+group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
+skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
+kurtosis = NULL, # Numeric vector. The kurtosis values for the observed variables. Defaults to zero.
+seed = NULL, # Set random seed.
+empirical = TRUE, # Logical. If TRUE, the implied moments (Mu and Sigma) specify the empirical not population mean and covariance matrix.
+return.type = "data.frame",
+return.fit = FALSE, # If TRUE, return the fitted model that has been used to generate the data as an attribute (called "fit"); this may be useful for inspection.
+debug = FALSE, # If TRUE, debugging information is displayed.
+standardized = FALSE # If TRUE, the residual variances of the observed variables are set in such a way such that the model implied variances are unity. This allows regression coefficients and factor loadings (involving observed variables) to be specified in a standardized metric.
+)
+# first i want to see how the data fits the model
+fit_cfa <- lavaan::cfa(model  = model_est,
+data = data_cfa
+)
+lavaan::summary(fit_cfa, fit.measures = TRUE)
+simModels$model[1]
+xi_1 =~  0.3 *x11 +  0.3 *x12 +  0.3 *x13 + 0.3 *x14 \n
+xi_2 =~  0.4 *x21 +  0.4 *x22 +  0.4 *x23 \n
+semTools::reliability(fit_cfa)
