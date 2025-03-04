@@ -12,8 +12,8 @@ source("2024_01_10_gradient_analytically_of_htmt.R")
 
 model_est <- '
               #  latent variables
-                xi_1 =~ x11 + x12 + x13
-                xi_2 =~ x21 + x22 + x23 + x24
+                xi_1 =~ x11 + x12 + x13 + x14
+                xi_2 =~ x21 + x22 + x23 
                 
                 xi_1 ~~ xi_2
               ' 
@@ -21,13 +21,13 @@ model_est <- '
 cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
-sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
-                foreach(n = c(25, 50, 100, 200, 500, 1000), .combine = "rbind") %:%
-                foreach(sim_runs = 1:3, .combine = "rbind") %dopar%
+sim_overview <- foreach(jj = 21:25, .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
+                foreach(n = c(100), .combine = "rbind") %:%
+                foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
                 {
                   seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
                   # sample.int(7489217391, 1)
-                  data_cfa <- lavaan::simulateData(model = model_list[[jj]],
+                  data_cfa <- lavaan::simulateData(model = simModels$model[jj],
                                                    model.type = "cfa",
                                                    meanstructure = FALSE, # means of observed variables enter the model
                                                    int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
@@ -54,8 +54,8 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                                                    debug = FALSE, # If TRUE, debugging information is displayed.
                                                    standardized = FALSE # If TRUE, the residual variances of the observed variables are set in such a way such that the model implied variances are unity. This allows regression coefficients and factor loadings (involving observed variables) to be specified in a standardized metric.
                                                    )
-                  
-                  vc_r <- calculate_corr_cov_fast(data = data_cfa)
+                  start_time_delta <- Sys.time()
+                  vc_r <- calculate_cov_cov(data = data_cfa)
                   gradient_htmt_1 <- calc_grad_htmt_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE)
                   #gradient_htmt_2 <- calc_grad_htmt2_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE) 
                   
@@ -63,6 +63,8 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                   #Gradient_htmt_2 <- as.matrix(gradient_htmt_2$output$gradient)
                   
                   se_htmt_1 = sqrt(t(Gradient_htmt) %*% vc_r %*% Gradient_htmt / n)
+                  end_time_delta <- Sys.time()
+                  delta_delta <- end_time_delta - start_time_delta
                   #se_htmt_2 = sqrt(t(Gradient_htmt_2) %*% vc_r %*% Gradient_htmt_2 / 100)
                   
                   t_value_htmt_1 = (gradient_htmt_1$HTMT - 1)/se_htmt_1
@@ -75,12 +77,17 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                   #Bootstrapping
                   #bootstrap <- boot(data_cfa, HTMT_function, R = 100, seed = seed)
                   set.seed(seed)
+                  start_time_boot <- Sys.time()
                   bootstrap <- boot(data_cfa, function(data, indices){calc_htmt(data = data[indices,], model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE, htmt2 = FALSE)}, R = 500)
                   bootstrap_htmt_1_se <- sd(na.omit(bootstrap$t))
+                  end_time_boot <- Sys.time()
+                  delta_boot <- end_time_boot - start_time_boot
                   bootstrap_htmt_1_bias <- bootstrap$t0 - mean(na.omit(bootstrap$t))
                   t_value_htmt_1_bootstrap <- (gradient_htmt_1$HTMT - 1) / bootstrap_htmt_1_se
                   
-                  save <- data.frame( model_type = names(model_list)[[jj]],
+                  save <- data.frame( loading1 = simModels$loading_1[jj],
+                                      loading2 = simModels$loading_2[jj],
+                                      correlation = simModels$correlation[jj],
                                       n = n,
                                       sim_runs,
                                       htmt_1 = gradient_htmt_1$HTMT,
@@ -88,13 +95,16 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
                                       t_value_htmt_1 = t_value_htmt_1,
                                       t_test_htmt_1 = t_value_htmt_1 <  qt(p = alpha_one_sided, df = df),
                                       CI_HTMT_90 = CI_HTMT_upper,
-                                      CI_HTMT_90_test = CI_HTMT_upper >= 1,
+                                      CI_HTMT_90_test = CI_HTMT_upper < 1,
                                       
                                       se_htmt_1_boot =  bootstrap_htmt_1_se,
                                       boot_htmt_1_bias = bootstrap_htmt_1_bias, 
                                       t_value_htmt_1_boot = t_value_htmt_1_bootstrap, 
                                       t_test_htmt_1_boot = t_value_htmt_1_bootstrap <  qt(p = alpha_one_sided, df = df),
-                                      seed = seed
+                                      seed = seed,
+                                      
+                                      comp_time_delta = delta_delta,
+                                      comp_time_boot = delta_boot
                                       
                                       #htmt_2 = gradient_htmt_2$HTMT2,
                                       #se_htmt_2 = se_htmt_2,
@@ -108,10 +118,12 @@ sim_overview <- foreach(jj = 1:length(model_list), .packages = c("lavaan", "semT
 closeAllConnections()
 sim_overview_without_NA <- sim_overview[complete.cases(sim_overview[,"se_htmt_2"]),]
 
-sim_overview_without_NA <- na.omit(sim_overview)
+sim_overview_withozt_na <- na.omit(sim_overview)
 
-sim_overview_2 <- sim_overview %>% 
-  group_by(model_type, n) %>%
+sim_overview_2 <- sim_overview_withozt_na %>% 
+  group_by(loading1, loading2, correlation) %>%
   summarize(Rejection_rate_htmt_1= mean(t_test_htmt_1), 
             #Rejection_rate_htmt_2 = mean(t_test_htmt_2), 
-            Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot))
+            Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot),
+            Rejection_rate_htmt_1_ci= mean(1-CI_HTMT_90_test)
+            )
