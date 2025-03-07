@@ -21,8 +21,8 @@ model_est <- '
 cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
-sim_overview <- foreach(jj = 21:25, .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
-                foreach(n = c(100), .combine = "rbind") %:%
+sim_overview <- foreach(jj = 36:40, .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
+                foreach(n = c(500), .combine = "rbind") %:%
                 foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
                 {
                   seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
@@ -56,7 +56,7 @@ sim_overview <- foreach(jj = 21:25, .packages = c("lavaan", "semTools", "stringr
                                                    )
                   start_time_delta <- Sys.time()
                   vc_r <- calculate_cov_cov(data = data_cfa)
-                  gradient_htmt_1 <- calc_grad_htmt_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE)
+                  gradient_htmt_1 <- calc_grad_htmt_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE)
                   #gradient_htmt_2 <- calc_grad_htmt2_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE) 
                   
                   Gradient_htmt <- as.matrix(gradient_htmt_1$output$gradient)
@@ -72,7 +72,7 @@ sim_overview <- foreach(jj = 21:25, .packages = c("lavaan", "semTools", "stringr
                   
                   alpha_one_sided <- 0.05
                   df <- n - 1
-                  CI_HTMT_upper = gradient_htmt_1$HTMT + qt(p = 1-alpha_one_sided/2, df = df) * se_htmt_1
+                  #CI_HTMT_upper = gradient_htmt_1$HTMT + qt(p = 1-alpha_one_sided/2, df = df) * se_htmt_1
                   
                   #Bootstrapping
                   #bootstrap <- boot(data_cfa, HTMT_function, R = 100, seed = seed)
@@ -94,8 +94,8 @@ sim_overview <- foreach(jj = 21:25, .packages = c("lavaan", "semTools", "stringr
                                       se_htmt_1_delta = se_htmt_1,
                                       t_value_htmt_1 = t_value_htmt_1,
                                       t_test_htmt_1 = t_value_htmt_1 <  qt(p = alpha_one_sided, df = df),
-                                      CI_HTMT_90 = CI_HTMT_upper,
-                                      CI_HTMT_90_test = CI_HTMT_upper < 1,
+                                      #CI_HTMT_90 = CI_HTMT_upper,
+                                      #CI_HTMT_90_test = CI_HTMT_upper < 1,
                                       
                                       se_htmt_1_boot =  bootstrap_htmt_1_se,
                                       boot_htmt_1_bias = bootstrap_htmt_1_bias, 
@@ -127,3 +127,24 @@ sim_overview_2 <- sim_overview_withozt_na %>%
             Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot),
             Rejection_rate_htmt_1_ci= mean(1-CI_HTMT_90_test)
             )
+
+sim_overview_withozt_na78 <- na.omit(sim_overview78)
+
+sim_overview_278 <- sim_overview_withozt_na78 %>% 
+  group_by(loading1, loading2, correlation) %>%
+  summarize(Rejection_rate_htmt_1= mean(t_test_htmt_1), 
+            #Rejection_rate_htmt_2 = mean(t_test_htmt_2), 
+            Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot),
+            Rejection_rate_htmt_1_ci= mean(1-CI_HTMT_90_test)
+  )
+
+
+sim_overview_withozt_na781000 <- na.omit(sim_overview781000)
+
+sim_overview_2781000 <- sim_overview_withozt_na781000 %>% 
+  group_by(loading1, loading2, correlation) %>%
+  summarize(Rejection_rate_htmt_1= mean(t_test_htmt_1), 
+            #Rejection_rate_htmt_2 = mean(t_test_htmt_2), 
+            Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot),
+            Rejection_rate_htmt_1_ci= mean(1-CI_HTMT_90_test)
+  )
