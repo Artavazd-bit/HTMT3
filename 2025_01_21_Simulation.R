@@ -27,7 +27,6 @@ sim_overview <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "semTool
                 foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
                 {
                   seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
-                  # sample.int(7489217391, 1)
                   data_cfa <- lavaan::simulateData(model = simModels$model[jj],
                                                    model.type = "cfa",
                                                    meanstructure = FALSE, # means of observed variables enter the model
@@ -101,18 +100,13 @@ sim_overview <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "semTool
                                       , boot_htmt_1_bias = bootstrap_htmt_1_bias
                                       , z_value_htmt_1_boot = z_value_htmt_1_bootstrap
                                       , z_test_htmt_1_boot = z_value_htmt_1_bootstrap <  qnorm(p = alpha_one_sided, mean = 0, sd = 1)
+                                      , boot_upper_bound = unname(boot_upper_bound)
                                       , CI_test <- unname(boot_upper_bound) < 1 
                                       , seed = seed
                                       
                                       , comp_time_delta = delta_delta
                                       , comp_time_boot = delta_boot
-                                      
-                                      #, htmt_2 = gradient_htmt_2$HTMT2
-                                      #, se_htmt_2 = se_htmt_2
-                                      #, t_value_htmt_2 = t_value_htmt_2
-                                      #, t_test_htmt_2 = t_value_htmt_2 < qnorm(0.05)
                                       )
-                  #save$seed <- list(seed)
                   save
                 }
 
