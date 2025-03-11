@@ -270,11 +270,11 @@ calculate_cov_cov <- function(data) {
   
   # Calculate covariances using vectorized operations
   for(idx1 in 1:nrow(indices)) {
-    x <- indices[idx1, "col"] # nochmal indices anschauen
-    y <- indices[idx1, "row"]
+    x <- indices[idx1, "row"] # nochmal indices anschauen
+    y <- indices[idx1, "col"]
     for(idx2 in idx1:nrow(indices)) {
-      z <- indices[idx2, 1] # nochmal indices anschauen!!
-      t <- indices[idx2, 2]
+      z <- indices[idx2, "row"] # nochmal indices anschauen!!
+      t <- indices[idx2, "col"]
       # Calculate fourth-order moments using pre-computed products
       omega_xyzt <- mean(products[, x, y] * products[, z, t]) - ( mean(products[, x, y]) * mean(products[, z, t]) )
       vc_r[idx1, idx2] <- omega_xyzt
