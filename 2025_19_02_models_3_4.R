@@ -28,3 +28,4 @@ simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
                               )
            save
             }
+
