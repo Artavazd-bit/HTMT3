@@ -21,13 +21,13 @@ model_est <- '
 cl <- parallel::makeCluster(4)
 doParallel::registerDoParallel(cl)
 
-sim_overview <- foreach(jj = 1:nrow(simModels_short), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
-                foreach(n = c(50, 100, 250, 1000), .combine = "rbind") %:%
+sim_overview <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
+                foreach(n = c(50, 100, 200, 500), .combine = "rbind") %:%
                 foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
                 {
                   seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
                   # sample.int(7489217391, 1)
-                  data_cfa <- lavaan::simulateData(model = simModels_short$model[jj],
+                  data_cfa <- lavaan::simulateData(model = simModels$model[jj],
                                                    model.type = "cfa",
                                                    meanstructure = FALSE, # means of observed variables enter the model
                                                    int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
@@ -75,15 +75,14 @@ sim_overview <- foreach(jj = 1:nrow(simModels_short), .packages = c("lavaan", "s
                   #CI_HTMT_upper = gradient_htmt_1$HTMT + qt(p = 1-alpha_one_sided/2, df = df) * se_htmt_1
                   
                   #Bootstrapping
-                  #bootstrap <- boot(data_cfa, HTMT_function, R = 100, seed = seed)
                   set.seed(seed)
-                  #start_time_boot <- Sys.time()
-                  #bootstrap <- boot(data_cfa, function(data, indices){calc_htmt(data = data[indices,], model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE, htmt2 = FALSE)}, R = 500)
-                  #bootstrap_htmt_1_se <- sd(na.omit(bootstrap$t))
-                  #end_time_boot <- Sys.time()
-                  #delta_boot <- end_time_boot - start_time_boot
-                  #bootstrap_htmt_1_bias <- bootstrap$t0 - mean(na.omit(bootstrap$t))
-                  #t_value_htmt_1_bootstrap <- (gradient_htmt_1$HTMT - 1) / bootstrap_htmt_1_se
+                  start_time_boot <- Sys.time()
+                  bootstrap <- boot(data_cfa, function(data, indices){calc_htmt(data = data[indices,], model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE, htmt2 = FALSE)}, R = 500)
+                  bootstrap_htmt_1_se <- sd(na.omit(bootstrap$t))
+                  end_time_boot <- Sys.time()
+                  delta_boot <- end_time_boot - start_time_boot
+                  bootstrap_htmt_1_bias <- bootstrap$t0 - mean(na.omit(bootstrap$t))
+                  t_value_htmt_1_bootstrap <- (gradient_htmt_1$HTMT - 1) / bootstrap_htmt_1_se
                   
                   save <- data.frame( loading1 = simModels$loading_1[jj]
                                       , loading2 = simModels$loading_2[jj]
@@ -94,22 +93,22 @@ sim_overview <- foreach(jj = 1:nrow(simModels_short), .packages = c("lavaan", "s
                                       , se_htmt_1_delta = se_htmt_1
                                       , t_value_htmt_1 = t_value_htmt_1
                                       , t_test_htmt_1 = t_value_htmt_1 <  qt(p = alpha_one_sided, df = df)
-                                      #CI_HTMT_90 = CI_HTMT_upper,
-                                      #CI_HTMT_90_test = CI_HTMT_upper < 1,
+                                      #, CI_HTMT_90 = CI_HTMT_upper
+                                      #, CI_HTMT_90_test = CI_HTMT_upper < 1
                                       
-                                      #se_htmt_1_boot =  bootstrap_htmt_1_se,
-                                      #boot_htmt_1_bias = bootstrap_htmt_1_bias, 
-                                      #t_value_htmt_1_boot = t_value_htmt_1_bootstrap, 
-                                      #t_test_htmt_1_boot = t_value_htmt_1_bootstrap <  qt(p = alpha_one_sided, df = df),
+                                      , se_htmt_1_boot =  bootstrap_htmt_1_se
+                                      , boot_htmt_1_bias = bootstrap_htmt_1_bias
+                                      , t_value_htmt_1_boot = t_value_htmt_1_bootstrap
+                                      , t_test_htmt_1_boot = t_value_htmt_1_bootstrap <  qt(p = alpha_one_sided, df = df)
                                       , seed = seed
                                       
                                       , comp_time_delta = delta_delta
-                                      #comp_time_boot = delta_boot
+                                      , comp_time_boot = delta_boot
                                       
-                                      #htmt_2 = gradient_htmt_2$HTMT2,
-                                      #se_htmt_2 = se_htmt_2,
-                                      #t_value_htmt_2 = t_value_htmt_2,
-                                      #t_test_htmt_2 = t_value_htmt_2 < qnorm(0.05),
+                                      #, htmt_2 = gradient_htmt_2$HTMT2
+                                      #, se_htmt_2 = se_htmt_2
+                                      #, t_value_htmt_2 = t_value_htmt_2
+                                      #, t_test_htmt_2 = t_value_htmt_2 < qnorm(0.05)
                                       )
                   #save$seed <- list(seed)
                   save
@@ -121,9 +120,13 @@ sim_overview_without_NA <- sim_overview[complete.cases(sim_overview[,"se_htmt_2"
 sim_overview_without_NA <- na.omit(sim_overview)
 
 sim_overview_2 <- sim_overview_without_NA %>% 
-  group_by(loading1, loading2, correlation) %>%
-  summarize(Rejection_rate_htmt_1= mean(t_test_htmt_1) 
+  group_by(loading1, loading2, correlation, n) %>%
+  summarize(Rejection_rate_htmt_1= mean(t_test_htmt_1), 
             #Rejection_rate_htmt_2 = mean(t_test_htmt_2), 
-            #Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot),
+            Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot),
+            comp_time_delta = mean(comp_time_delta), 
+            comp_time_boot = mean(comp_time_boot)
             #Rejection_rate_htmt_1_ci= mean(1-CI_HTMT_90_test)
             )
+
+write.csv2(sim_overview, file= "2025_03_11_sim_overview.csv")
