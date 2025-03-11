@@ -263,17 +263,17 @@ calculate_cov_cov <- function(data) {
   products <- array(0, dim = c(n, p, p))
   for(i in 1:p) {
     for(j in i:p) {
-      products[, i, j] <- data_centered[, i] * data_centered[, j]
+      products[, i, j] <- data_centered[, i] * data_centered[, j] # hier ändere ich die Objektklasse, drop = FALSE
       products[, j, i] <- products[, i, j]
     }
   }
   
   # Calculate covariances using vectorized operations
   for(idx1 in 1:nrow(indices)) {
-    x <- indices[idx1, 1]
-    y <- indices[idx1, 2]
+    x <- indices[idx1, "col"] # nochmal indices anschauen
+    y <- indices[idx1, "row"]
     for(idx2 in idx1:nrow(indices)) {
-      z <- indices[idx2, 1]
+      z <- indices[idx2, 1] # nochmal indices anschauen!!
       t <- indices[idx2, 2]
       # Calculate fourth-order moments using pre-computed products
       omega_xyzt <- mean(products[, x, y] * products[, z, t]) - ( mean(products[, x, y]) * mean(products[, z, t]) )

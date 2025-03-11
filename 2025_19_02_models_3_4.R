@@ -1,6 +1,6 @@
-coefs <- c(0.3, 0.4, 0.7, 0.8, 0.9)
+coefs <- c(0.5, 0.7, 0.9)
 loadings <- combn(coefs, 2)
-correlation <- c(0.5, 0.7, 0.8, 0.9, 1)
+correlation <- c(0.5, 0.8, 0.9, 1)
 errorvar <- (1-loadings^2)
 data_frame <- as.data.frame(matrix(nrow = , ncol = 10))
 simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:% 
@@ -28,5 +28,3 @@ simModels <- foreach(i = 1:ncol(loadings), .combine = "rbind") %:%
                               )
            save
             }
-
-simModels_short <- simModels[-c(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 31, 32, 33, 34, 35, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50),]
