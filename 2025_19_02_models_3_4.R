@@ -1,5 +1,9 @@
+# nachbessern
+
 coefs <- c(0.5, 0.7, 0.9)
 loadings <- combn(coefs, 2)
+#expand.grid function lieber als combn verwenden
+expand.grid(loading_1 = coefs, loading_2 = coefs, correlation = c(0.5, 0.8, 0.9, 1))
 correlation <- c(0.5, 0.8, 0.9, 1)
 errorvar <- (1-loadings^2)
 data_frame <- as.data.frame(matrix(nrow = , ncol = 10))
