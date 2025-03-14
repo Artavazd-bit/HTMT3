@@ -9,6 +9,7 @@ library(boot)
 
 source("2024_01_08_functions.R")
 source("2024_01_10_gradient_analytically_of_htmt.R")
+source("2025_19_02_models_3_4.R")
 
 model_est <- '
               #  latent variables
@@ -23,7 +24,6 @@ doParallel::registerDoParallel(cl)
 
 sim_overview <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
                 foreach(n = c(50, 100, 200, 500), .combine = "rbind") %:%
-                foreach(alpha_one_sided = c(0.05, 0.01, 0.1),  .combine = "rbind") %:% 
                 foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
                 {
                   seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
@@ -64,15 +64,18 @@ sim_overview <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "semTool
                   end_time_delta <- Sys.time()
                   
                   delta_delta <- end_time_delta - start_time_delta
+                  alpha_vector <- c(0.9, 0.95, 0.99)
                   
-                  CI_HTMT_upper = gradient_htmt_1$HTMT + qnorm(p = 1-alpha_one_sided, mean = 1, sd = se_htmt_1)
+                  CI_HTMT_upper = gradient_htmt_1$HTMT + qnorm(p = alpha_vector, mean = 1, sd = se_htmt_1)
+                  names(CI_HTMT_upper) <- c("0.9", "0.95", "0.99")
                   
                   #Bootstrapping
                   set.seed(seed)
                   start_time_boot <- Sys.time()
                   bootstrap <- boot(data_cfa, function(data, indices){calc_htmt(data = data[indices,], model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = TRUE, htmt2 = FALSE)}, R = 500)
                   bootstrap_htmt_1_se <- sd(bootstrap$t, na.rm = TRUE)
-                  boot_upper_bound <- quantile(bootstrap$t, na.rm = TRUE, probs = 1-alpha_one_sided)
+                  boot_upper_bound <- quantile(bootstrap$t, na.rm = TRUE, probs = alpha_vector)
+                  names(boot_upper_bound) <- c("0.9", "0.95", "0.99")
                   end_time_boot <- Sys.time()
                   
                   delta_boot <- end_time_boot - start_time_boot
@@ -89,19 +92,36 @@ sim_overview <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "semTool
                                       , htmt_1 = gradient_htmt_1$HTMT
                                       , se_htmt_1_delta = se_htmt_1
                                       , z_value_htmt_1 = z_value_htmt_1
-                                      , z_test_htmt_1 = z_value_htmt_1 <  qnorm(p = alpha_one_sided, mean = 0, sd = 1) 
                                       
-                                      , CI_HTMT_90 = CI_HTMT_upper
-                                      , CI_HTMT_90_test = CI_HTMT_upper < 1
                                       
-                                      , alpha = alpha_one_sided
+                                      , z_test_htmt_09 = z_value_htmt_1 <  qnorm(p = 1 - alpha_vector[1], mean = 0, sd = 1)
+                                      , z_test_htmt_095 = z_value_htmt_1 <  qnorm(p = 1 - alpha_vector[2], mean = 0, sd = 1)
+                                      , z_test_htmt_099 = z_value_htmt_1 <  qnorm(p = 1 - alpha_vector[3], mean = 0, sd = 1)
                                       
+                                      , CI_HTMT_09 = unname(CI_HTMT_upper["0.9"])
+                                      , CI_HTMT_095 = unname(CI_HTMT_upper["0.95"])
+                                      , CI_HTMT_099 = unname(CI_HTMT_upper["0.99"])
+                                      
+                                      , CI_HTMT_09_test = unname(CI_HTMT_upper["0.9"]) < 1
+                                      , CI_HTMT_095_test = unname(CI_HTMT_upper["0.95"]) < 1
+                                      , CI_HTMT_099_test = unname(CI_HTMT_upper["0.99"]) < 1
+                      
                                       , se_htmt_1_boot =  bootstrap_htmt_1_se
                                       , boot_htmt_1_bias = bootstrap_htmt_1_bias
                                       , z_value_htmt_1_boot = z_value_htmt_1_bootstrap
-                                      , z_test_htmt_1_boot = z_value_htmt_1_bootstrap <  qnorm(p = alpha_one_sided, mean = 0, sd = 1)
-                                      , boot_upper_bound = unname(boot_upper_bound)
-                                      , CI_test <- unname(boot_upper_bound) < 1 
+                                      
+                                      
+                                      , z_test_htmt_boot_09 = z_value_htmt_1_bootstrap <  qnorm(p = 1 - alpha_vector[1], mean = 0, sd = 1)
+                                      , z_test_htmt_boot_095 = z_value_htmt_1_bootstrap <  qnorm(p = 1 - alpha_vector[2], mean = 0, sd = 1)
+                                      , z_test_htmt_boot_099 = z_value_htmt_1_bootstrap <  qnorm(p = 1 - alpha_vector[3], mean = 0, sd = 1)
+                                      
+                                      , boot_ub_09 = unname(boot_upper_bound["0.9"])
+                                      , boot_ub_095 = unname(boot_upper_bound["0.95"])
+                                      , boot_ub_099 = unname(boot_upper_bound["0.99"])
+                                      
+                                      , CI_boot_09 = unname(boot_upper_bound["0.9"]) < 1 
+                                      , CI_boot_095 = unname(boot_upper_bound["0.95"]) < 1 
+                                      , CI_boot_099 = unname(boot_upper_bound["0.99"]) < 1 
                                       , seed = seed
                                       
                                       , comp_time_delta = delta_delta
@@ -116,14 +136,21 @@ sim_overview_without_NA <- sim_overview[complete.cases(sim_overview[,"se_htmt_2"
 sim_overview_without_NA <- na.omit(sim_overview)
 
 sim_overview_2 <- sim_overview_without_NA %>% 
-  group_by(loading1, loading2, correlation, n, alpha) %>%
-  summarize(Rejection_rate_htmt_1= mean(z_test_htmt_1), 
-            #Rejection_rate_htmt_2 = mean(t_test_htmt_2), 
-            Rejection_rate_htmt_1_boot = mean(t_test_htmt_1_boot),
-            rejection_rate_boot_ci = mean(CI_test....boot_upper_bound...1), 
+  group_by(loading1, loading2, correlation, n) %>%
+  summarize(Rejection_rate_htmt_09= mean(z_test_htmt_09), 
+            Rejection_rate_htmt_095= mean(z_test_htmt_095),
+            Rejection_rate_htmt_099= mean(z_test_htmt_099),
+            
+            Rejection_CI_09 = mean(CI_HTMT_09_test), 
+            Rejection_CI_095 = mean(CI_HTMT_095_test),
+            Rejection_CI_099 = mean(CI_HTMT_099_test),
+            
+            Rejection_boot_09 = mean(CI_boot_09), 
+            Rejection_boot_095 = mean(CI_boot_095),
+            Rejection_boot_099 = mean(CI_boot_099), 
+            
             comp_time_delta = mean(comp_time_delta), 
             comp_time_boot = mean(comp_time_boot)
-            #Rejection_rate_htmt_1_ci= mean(1-CI_HTMT_90_test)
             )
 
 write.csv2(sim_overview, file= "2025_03_11_sim_overview.csv")
