@@ -34,7 +34,7 @@ sim_overview_com$corr_new <- paste("phi ==", sim_overview_com$correlation)
 ggplot(sim_overview_com[sim_overview_com$correlation != 1,], aes(n, RR_09)) + 
   geom_line(aes(linetype = as.factor(Method))) + 
   geom_point() + facet_grid(cols = vars(loading_com), rows = vars(corr_new), labeller = label_parsed)  + 
-  geom_hline(yintercept = c(0.1, 0.8), color = "red") + 
+  geom_hline(yintercept = c( 0.8), color = "red") + 
   theme(legend.position="left", legend.title=element_blank())
 
 
@@ -48,7 +48,7 @@ ggplot(sim_overview_com[sim_overview_com$correlation == 1,], aes(n, RR_09)) +
 ggplot(sim_overview_com[sim_overview_com$correlation != 1,], aes(n, RR_099)) + 
   geom_line(aes(linetype = as.factor(Method))) + geom_point() + 
   facet_grid(cols = vars(loading_com), rows = vars(corr_new), labeller = label_parsed)  + 
-  geom_hline(yintercept = c(0.01, 0.8), color = "red") + 
+  geom_hline(yintercept = c(0.8), color = "red") + 
   theme(legend.position="left", legend.title=element_blank())
 
 ggplot(sim_overview_com[sim_overview_com$correlation == 1,], aes(n, RR_099)) + 
@@ -61,7 +61,7 @@ ggplot(sim_overview_com[sim_overview_com$correlation == 1,], aes(n, RR_099)) +
 ggplot(sim_overview_com[sim_overview_com$correlation != 1,], aes(n, RR_095)) + 
   geom_line(aes(linetype = as.factor(Method))) + geom_point() + 
   facet_grid(cols = vars(loading_com), rows = vars(corr_new), labeller = label_parsed)  + 
-  geom_hline(yintercept = c(0.05, 0.8), color = "red") + 
+  geom_hline(yintercept = c(0.8), color = "red") + 
   theme(legend.position="left", legend.title=element_blank()) 
 
 
