@@ -158,3 +158,48 @@ calc_htmt <- function(data, model, latent1, latent2, scale = TRUE, htmt2 = FALSE
 } 
 
 
+wis <- function(covdata, model, latent1, latent2){
+  indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model)
+  
+  all_indicators <- unlist(indicators)
+  
+  cor_subset_data <- covdata
+  ind <- which( lower.tri(cor_subset_data,diag=F) , arr.ind = TRUE )
+  cor_values <- data.frame( col = dimnames(cor_subset_data)[[2]][ind[,2]] ,
+                            row = dimnames(cor_subset_data)[[1]][ind[,1]] ,
+                            val = cor_subset_data[ ind ] )
+  
+  cor_values$type[cor_values$col %in% unlist(indicators[1]) & cor_values$row %in% unlist(indicators[1])] <- "mono1"
+  cor_values$type[cor_values$col %in% unlist(indicators[2]) & cor_values$row %in% unlist(indicators[2])] <- "mono2"
+  cor_values$type[cor_values$col %in% unlist(indicators[1]) & cor_values$row %in% unlist(indicators[2])] <- "het"
+  
+  cor_values
+}
+
+
+calc_htmt2 <- function(cor_values = cor_values, htmt2 = FALSE){
+
+  K_i <-  (1+sqrt(1+4*2*length(cor_values[cor_values$type == "mono1","type"])))/2
+  K_j <-  (1+sqrt(1+4*2*length(cor_values[cor_values$type == "mono2","type"])))/2
+  
+  if(htmt2 == FALSE){
+    A = 1/(K_i*K_j) * sum(cor_values$val[cor_values$type == "het"])
+    B = 2/(K_i*(K_i-1)) *  sum(cor_values$val[cor_values$type == "mono1"]) 
+    C = 2/(K_j*(K_j-1)) *  sum(cor_values$val[cor_values$type == "mono2"]) 
+    HTMT <- A / ((B*C)^(1/2))
+  }
+  else if(htmt2 == TRUE){
+    A =  prod(cor_values$val[cor_values$type == "het"])^(1/(K_i*K_j))
+    B =  prod(cor_values$val[cor_values$type == "mono1"])^(2/(K_i*(K_i-1))) 
+    C =  prod(cor_values$val[cor_values$type == "mono2"])^(2/(K_j*(K_j-1))) 
+    HTMT <- A / ((B*C)^(1/2))
+  }
+  else{
+    print("ERROR")
+  }
+  return(HTMT)
+} 
+
+
+
+

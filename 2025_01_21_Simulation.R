@@ -153,5 +153,3 @@ sim_overview_2 <- sim_overview_without_NA %>%
             comp_time_boot = mean(comp_time_boot)
             )
 
-write.csv2(sim_overview, file= "2025_03_11_sim_overview.csv")
-write.csv2(sim_overview_2, file = "2025_03_11_sim_overview2.csv")
