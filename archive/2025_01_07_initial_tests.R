@@ -29,14 +29,14 @@ model_dgp <- '
 
 model_dgp2 <- '
               #  latent variables
-                xi_1 =~ 0.8*x11 + 0.8*x12 + 0.8*x13
-                xi_2 =~ 0.7*x21 + 0.7*x22 + 0.7*x23 + 0.7*x24
-                x11 ~~ 1*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
-                x12 ~~ 1*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
-                x13 ~~ 1*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
-                x21 ~~ 1*x21 + 0*x22 + 0*x23 + 0*x24
-                x22 ~~ 1*x22 + 0*x23 + 0*x24
-                x23 ~~ 1*x23 + 0*x24
+                xi_1 =~ 0.8*x11 + 0.8*x12 + 0.8*x13 + 0.7*x14
+                xi_2 =~ 0.7*x21 + 0.7*x22 + 0.7*x23 
+                x11 ~~ 3*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
+                x12 ~~ 6*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
+                x13 ~~ 10*x13 + 0*x21 + 0*x22 + 0*x23 + 0*x24
+                x21 ~~ 2*x21 + 0*x22 + 0*x23 + 0*x24
+                x22 ~~ 4*x22 + 0*x23 + 0*x24
+                x23 ~~ 5*x23 + 0*x24
                 x24 ~~ 1*x24
               #  fix covariances between xi_1 and xi_2 und setze die Varianz auf 1
                 xi_1 ~~ 1*xi_1 + 1*xi_2
@@ -56,7 +56,7 @@ model_est <- '
 
 
 
-data_cfa <- lavaan::simulateData(model = simModels_parallel$model[1], 
+data_cfa <- lavaan::simulateData(model = model_dgp2, 
                             model.type = "cfa",
                             meanstructure = FALSE, # means of observed variables enter the model
                             int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
@@ -71,7 +71,7 @@ data_cfa <- lavaan::simulateData(model = simModels_parallel$model[1],
                             auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
                             auto.cov.lv.x = FALSE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
                             auto.cov.y = FALSE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
-                            sample.nobs = 100, # Number of observations.
+                            sample.nobs = 5000, # Number of observations.
                             ov.var = NULL,# The user-specified variances of the observed variables.
                             group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
                             skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
@@ -112,7 +112,10 @@ htmt <- semTools::htmt(model = model_est,
                )
 # calculate the covariance-variance matrix of the correlationmatrix of the data from above
 # functions are defined in 2024_08_01_functions.R
-vc_r <- calculate_corr_cov_fast(data = data_cfa)
+scale_data <- scale(data_cfa)
+vc_r <- calculate_corr_cov_fast(data = scale_data)
+vc_r2 <- calculate_cov_cov(data = scale_data)
+all.equal(vc_r, vc_r2)
 
 # calculate the gradient of the htmt - Function
 # it has two outputs in a list, a gradient for htmt and htmt2 
@@ -147,3 +150,13 @@ cSEM::calculateHTMT()
 calc_htmt(data = data_cfa, model = model_est, latent1 = "xi_1", "xi_2", scale = TRUE, htmt2 = FALSE)
 
 calc_htmt(data = data_cfa, model = model_est, latent1 = "xi_1", "xi_2", scale = TRUE, htmt2 = TRUE)
+
+
+
+
+grad1 <- calc_grad_htmt_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE)
+grad2 <- calc_grad_htmt_ana_alt(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE)
+
+all.equal(grad1$output$gradient, grad2$output$gradient)
+
+

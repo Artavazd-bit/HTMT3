@@ -1,3 +1,5 @@
+.libPaths(c("/home/jab49wd/R-projects/R/library", .libPaths()))
+
 library(lavaan)
 library(semTools)
 library(cSEM)
@@ -18,51 +20,53 @@ model_est <- '
                 
                 xi_1 ~~ xi_2
               ' 
+simModels <- simModels_tau
 
-cl <- parallel::makeCluster(4)
+cl <- parallel::makeCluster(8)
 doParallel::registerDoParallel(cl)
+clusterEvalQ(cl, .libPaths("/home/jab49wd/R-projects/R/library"))
 
 sim_overview <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "semTools", "stringr", "boot"), .combine = "rbind") %:%
-                foreach(n = c(50, 100, 200, 500), .combine = "rbind") %:%
-                foreach(sim_runs = 1:1000, .combine = "rbind") %dopar%
-                {
-                  seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
-                  data_cfa <- lavaan::simulateData(model = simModels$model[jj],
-                                                   model.type = "cfa",
-                                                   meanstructure = FALSE, # means of observed variables enter the model
-                                                   int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
-                                                   int.lv.free = FALSE, # if false, intercepts of latent var fixed to zero
-                                                   marker.int.zero = FALSE, # only relevant, if the metric of each latent var is set by fixing the first factor loading to unity
-                                                   conditional.x = FALSE, # If TRUE, we set up the model on the exogenous "x" covariates, the model implied sample statistics only include the non-x variables. If FALSE x are modelled jointly with the other variables and the model implied statistics reflect both sets of variables. 
-                                                   fixed.x = FALSE, # if TRUE, ex x are considered fixed
-                                                   orthogonal = FALSE, # if TRUE exogenous latent variables are assumed to be uncorrelated
-                                                   std.lv = FALSE, # If TRUE, the metric of each latent variable is determined by fixing their variances to 1.0. If FALSE, the metric of each latent variable is determined by fixing the factor loading of the first indicator to 1.0.
-                                                   auto.fix.first = FALSE, # If TRUE, the factor loading of the first indicator is set to 1.0 for every latent variable
-                                                   auto.fix.single = FALSE, # If TRUE, the residual variance (if included) of an observed indicator is set to zero if it is the only indicator of a latent variable.
-                                                   auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
-                                                   auto.cov.lv.x = TRUE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
-                                                   auto.cov.y = FALSE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
-                                                   sample.nobs = n, # Number of observations.
-                                                   ov.var = NULL,# The user-specified variances of the observed variables.
-                                                   group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
-                                                   skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
-                                                   kurtosis = NULL, # Numeric vector. The kurtosis values for the observed variables. Defaults to zero.
-                                                   seed = seed, # Set random seed.
-                                                   empirical = FALSE, # Logical. If TRUE, the implied moments (Mu and Sigma) specify the empirical not population mean and covariance matrix.
-                                                   return.type = "data.frame",
-                                                   return.fit = FALSE, # If TRUE, return the fitted model that has been used to generate the data as an attribute (called "fit"); this may be useful for inspection.
-                                                   debug = FALSE, # If TRUE, debugging information is displayed.
-                                                   standardized = FALSE # If TRUE, the residual variances of the observed variables are set in such a way such that the model implied variances are unity. This allows regression coefficients and factor loadings (involving observed variables) to be specified in a standardized metric.
-                                                   )
-                  #Delta 
-                  start_time_delta <- Sys.time()
-                  vc_r <- calculate_cov_cov(data = data_cfa)
-                  gradient_htmt_1 <- calc_grad_htmt_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE)
-                  Gradient_htmt <- as.matrix(gradient_htmt_1$output$gradient)
-                  se_htmt_1 = sqrt(t(Gradient_htmt) %*% vc_r %*% Gradient_htmt / n)
-                  z_value_htmt_1 = (gradient_htmt_1$HTMT - 1)/se_htmt_1
-                  end_time_delta <- Sys.time()
-                  
+  foreach(n = c(50, 100, 200, 500), .combine = "rbind") %:%
+  foreach(sim_runs = 1:10000, .combine = "rbind") %dopar%
+  {
+    seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
+    data_cfa <- lavaan::simulateData(model = simModels$model[jj],
+                                     model.type = "cfa",
+                                     meanstructure = FALSE, # means of observed variables enter the model
+                                     int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
+                                     int.lv.free = FALSE, # if false, intercepts of latent var fixed to zero
+                                     marker.int.zero = FALSE, # only relevant, if the metric of each latent var is set by fixing the first factor loading to unity
+                                     conditional.x = FALSE, # If TRUE, we set up the model on the exogenous "x" covariates, the model implied sample statistics only include the non-x variables. If FALSE x are modelled jointly with the other variables and the model implied statistics reflect both sets of variables. 
+                                     fixed.x = FALSE, # if TRUE, ex x are considered fixed
+                                     orthogonal = FALSE, # if TRUE exogenous latent variables are assumed to be uncorrelated
+                                     std.lv = FALSE, # If TRUE, the metric of each latent variable is determined by fixing their variances to 1.0. If FALSE, the metric of each latent variable is determined by fixing the factor loading of the first indicator to 1.0.
+                                     auto.fix.first = FALSE, # If TRUE, the factor loading of the first indicator is set to 1.0 for every latent variable
+                                     auto.fix.single = FALSE, # If TRUE, the residual variance (if included) of an observed indicator is set to zero if it is the only indicator of a latent variable.
+                                     auto.var = TRUE, # If TRUE, the (residual) variances of both observed and latent variables are set free.
+                                     auto.cov.lv.x = TRUE, # If TRUE, the covariances of exogenous latent variables are included in the model and set free.
+                                     auto.cov.y = FALSE,# If TRUE, the covariances of dependent variables (both observed and latent) are included in the model and set free.
+                                     sample.nobs = n, # Number of observations.
+                                     ov.var = NULL,# The user-specified variances of the observed variables.
+                                     group.label = paste("G", 1:ngroups, sep = ""), # The group labels that should be used if multiple groups are created.
+                                     skewness = NULL, # Numeric vector. The skewness values for the observed variables. Defaults to zero.
+                                     kurtosis = NULL, # Numeric vector. The kurtosis values for the observed variables. Defaults to zero.
+                                     seed = seed, # Set random seed.
+                                     empirical = FALSE, # Logical. If TRUE, the implied moments (Mu and Sigma) specify the empirical not population mean and covariance matrix.
+                                     return.type = "data.frame",
+                                     return.fit = FALSE, # If TRUE, return the fitted model that has been used to generate the data as an attribute (called "fit"); this may be useful for inspection.
+                                     debug = FALSE, # If TRUE, debugging information is displayed.
+                                     standardized = FALSE # If TRUE, the residual variances of the observed variables are set in such a way such that the model implied variances are unity. This allows regression coefficients and factor loadings (involving observed variables) to be specified in a standardized metric.
+    )
+    #Delta 
+    start_time_delta <- Sys.time()
+    vc_r <- calculate_cov_cov(data = data_cfa)
+    gradient_htmt_1 <- calc_grad_htmt_ana(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE)
+    Gradient_htmt <- as.matrix(gradient_htmt_1$output$gradient)
+    se_htmt_1 = sqrt(t(Gradient_htmt) %*% vc_r %*% Gradient_htmt / n)
+    z_value_htmt_1 = (gradient_htmt_1$HTMT - 1)/se_htmt_1
+    end_time_delta <- Sys.time()
+    
                   delta_delta <- end_time_delta - start_time_delta
                   alpha_vector <- c(0.9, 0.95, 0.99)
                   
@@ -131,7 +135,6 @@ sim_overview <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "semTool
                 }
 
 closeAllConnections()
-sim_overview_without_NA <- sim_overview[complete.cases(sim_overview[,"se_htmt_2"]),]
 
 sim_overview_without_NA <- na.omit(sim_overview)
 
@@ -152,4 +155,7 @@ sim_overview_2 <- sim_overview_without_NA %>%
             comp_time_delta = mean(comp_time_delta), 
             comp_time_boot = mean(comp_time_boot)
             )
+
+write.csv2(sim_overview, "SLURM.csv")
+write.csv2(sim_overview_2, "SLURM2.csv")
 

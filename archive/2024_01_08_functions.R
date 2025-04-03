@@ -132,7 +132,7 @@ calculate_corr_cov_fast <- function(data) {
       
       sd <- sd(data[,x]) * sd(data[,y]) * sd(data[,z]) * sd(data[,t])
       
-  
+      
       # Calculate fourth-order moments using pre-computed products
       mu_xyzt <- mean(products[, x, y] * products[, z, t])  / sd
       

@@ -31,6 +31,9 @@ sim_overview_com <-  rbind(sim_overview_delta, sim_overview_boot)
 sim_overview_com$loading_com <- paste0("lambda[1]==", sim_overview_com$loading1, "~lambda[2]==" , sim_overview_com$loading2)
 sim_overview_com$corr_new <- paste("phi ==", sim_overview_com$correlation)
 
+
+
+
 ggplot(sim_overview_com[sim_overview_com$correlation != 1,], aes(n, RR_09)) + 
   geom_line(aes(linetype = as.factor(Method))) + 
   geom_point() + facet_grid(cols = vars(loading_com), rows = vars(corr_new), labeller = label_parsed)  + 
@@ -71,5 +74,5 @@ ggplot(sim_overview_com[sim_overview_com$correlation == 1,], aes(n, RR_095)) +
   geom_hline(yintercept = c(0.05), color = "red") + 
   theme(legend.position="left", legend.title=element_blank())   
 
-
+#####################################################################################################
 
