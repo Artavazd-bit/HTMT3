@@ -92,8 +92,8 @@ calc_grad_htmt2_ana <- function(data, model, latent1, latent2, scale = TRUE){
   
   ind <- which( lower.tri(cor_subset_data,diag=F) , arr.ind = TRUE )
   cor_values <- data.frame( col = dimnames(cor_subset_data)[[2]][ind[,2]] ,
-              row = dimnames(cor_subset_data)[[1]][ind[,1]] ,
-              val = cor_subset_data[ ind ] )
+                            row = dimnames(cor_subset_data)[[1]][ind[,1]] ,
+                            val = cor_subset_data[ ind ] )
   
   cor_values$type[cor_values$col %in% unlist(indicators[1]) & cor_values$row %in% unlist(indicators[1])] <- "mono1"
   cor_values$type[cor_values$col %in% unlist(indicators[2]) & cor_values$row %in% unlist(indicators[2])] <- "mono2"
@@ -140,10 +140,10 @@ calc_htmt <- function(data, model, latent1, latent2, scale = TRUE, htmt2 = FALSE
   K_j <- length(unlist(indicators[2]))
   
   if(htmt2 == FALSE){
-  A = 1/(K_i*K_j) * sum(cor_values$val[cor_values$type == "het"])
-  B = 2/(K_i*(K_i-1)) *  sum(cor_values$val[cor_values$type == "mono1"]) 
-  C = 2/(K_j*(K_j-1)) *  sum(cor_values$val[cor_values$type == "mono2"]) 
-  HTMT <- A / ((B*C)^(1/2))
+    A = 1/(K_i*K_j) * sum(cor_values$val[cor_values$type == "het"])
+    B = 2/(K_i*(K_i-1)) *  sum(cor_values$val[cor_values$type == "mono1"]) 
+    C = 2/(K_j*(K_j-1)) *  sum(cor_values$val[cor_values$type == "mono2"]) 
+    HTMT <- A / ((B*C)^(1/2))
   }
   else if(htmt2 == TRUE){
     A =  prod(cor_values$val[cor_values$type == "het"])^(1/(K_i*K_j))
@@ -178,7 +178,7 @@ wis <- function(covdata, model, latent1, latent2){
 
 
 calc_htmt2 <- function(cor_values = cor_values, htmt2 = FALSE){
-
+  
   K_i <-  (1+sqrt(1+4*2*length(cor_values[cor_values$type == "mono1","type"])))/2
   K_j <-  (1+sqrt(1+4*2*length(cor_values[cor_values$type == "mono2","type"])))/2
   
@@ -198,6 +198,50 @@ calc_htmt2 <- function(cor_values = cor_values, htmt2 = FALSE){
     print("ERROR")
   }
   return(HTMT)
+} 
+
+
+
+
+
+calc_grad_htmt_ana_alt <- function(data, model, latent1, latent2, scale = TRUE){
+  indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model)
+  
+  all_indicators <- unlist(indicators)
+  
+  subset_data <- data[, all_indicators]
+  
+  if(scale == FALSE){
+    cor_subset_data <- cov(subset_data)
+  } else { 
+    cor_subset_data <- cor(subset_data)
+  }  
+  
+  
+  ind <- which( lower.tri(cor_subset_data,diag=F) , arr.ind = TRUE )
+  cor_values <- data.frame( col = dimnames(cor_subset_data)[[2]][ind[,2]] ,
+                            row = dimnames(cor_subset_data)[[1]][ind[,1]] ,
+                            val = cor_subset_data[ ind ] )
+  
+  cor_values$type[cor_values$col %in% unlist(indicators[1]) & cor_values$row %in% unlist(indicators[1])] <- "mono1"
+  cor_values$type[cor_values$col %in% unlist(indicators[2]) & cor_values$row %in% unlist(indicators[2])] <- "mono2"
+  cor_values$type[cor_values$col %in% unlist(indicators[1]) & cor_values$row %in% unlist(indicators[2])] <- "het"
+  
+  K_i <- length(unlist(indicators[1]))
+  K_j <- length(unlist(indicators[2]))
+  
+  A = 1/(K_i*K_j) * sum(cor_values$val[cor_values$type == "het"])
+  B = 2/(K_i*(K_i-1)) *  sum(cor_values$val[cor_values$type == "mono1"]) 
+  C = 2/(K_j*(K_j-1)) *  sum(cor_values$val[cor_values$type == "mono2"]) 
+  
+  HTMT <- A / ((B*C)^(1/2))
+  
+  
+  cor_values$gradient[cor_values$type == "het"] <- (1/(K_i*K_j) )/((B*C)^(1/2))
+  cor_values$gradient[cor_values$type == "mono1"] <- -HTMT * 1/(K_i*(K_i-1)) * B^-1
+  cor_values$gradient[cor_values$type == "mono2"] <- -HTMT * 1/(K_j*(K_j-1)) * C^-1
+  
+  list(output = cor_values, HTMT = HTMT)
 } 
 
 

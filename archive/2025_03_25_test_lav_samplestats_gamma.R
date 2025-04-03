@@ -44,29 +44,32 @@ model_est <- '
                 xi_1 ~~ xi_2
               ' 
 
+head(data_cfa)
+
 # first i want to see how the data fits the model
 fit_cfa <- lavaan::cfa(model  = model_est, 
-                       data = data_cfa
-)
+                       data = data_cfa)
+
+datscale <- scale(data_cfa)
+
+fit_cfa2 <- lavaan::cfa(model  = model_est, 
+                       data = datscale)
+
+summary(fit_cfa2)
 
 lavdata <- fit_cfa@Data
 lavoptions <- lavInspect(fit_cfa, "options")
 lavoptions$gamma.unbiased <- FALSE
 lavoptions$gamma.n.minus.one <- FALSE
 lavoptions$correlation <- FALSE
-lavoptions$conditional.x <- TRUE
+lavoptions$conditional.x <- FALSE
 lavoptions$fixed.x <- FALSE
 lavoptions$meanstructure <- FALSE
 
 test <- lavaan::lav_samplestats_from_data(lavdata = lavdata, lavoptions = lavoptions, NACOV = TRUE)
 
-
-
 #ahhh er nimmt die varianz mit, deswegen hier eine 28x28 Matrix.
 test@NACOV
-# ich hab nur 21x21 weil nur untere Dreieicksmatrix.
-vc_r <- calculate_corr_cov_fast(data = data_cfa)
-vc_r
 
 cov(data_cfa)*((100-1)/100) - test@cov[[1]]
 # ergibt gleich 0
@@ -92,7 +95,7 @@ nacov <- function(data){
   # zentrierung der Daten??????
   Zc <- t(t(Z) - colMeans(Z, na.rm = TRUE))
   #das ist das gleiche wie test@NACOV
-  NACOV <- base::crossprod(Zc) / nrow(X)
+  NACOV <- base::crossprod(Zc) / nrow(data)
   NACOV
 }
 all.equal(nacov(data_cfa), calculate_cov_cov(data_cfa))
