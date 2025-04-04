@@ -28,15 +28,17 @@ simdataag_long <- simdataag %>%
     names_prefix = "rr"          # entfernt "RR_" aus den Werten in RR_nummer
   )
 
+simdataag_long$correlation <- paste("phi ==", simdataag_long$correlation)
 
-ggplot(simdataag_long[simdataag_long$correlation != 1,], aes(n, rr)) + 
+
+ggplot(simdataag_long[simdataag_long$correlation != "phi == 1",], aes(n, rr)) + 
   geom_line(aes(linetype = as.factor(Method))) + 
   geom_point() + facet_grid(cols = vars(data), rows = vars(correlation), labeller = label_parsed)  + 
   geom_hline(yintercept = c( 0.8), color = "red") + 
   theme(legend.position="left", legend.title=element_blank()) + ylab("Rejectionrate")
 
 
-ggplot(simdataag_long[simdataag_long$correlation == 1,], aes(n, rr)) + 
+ggplot(simdataag_long[simdataag_long$correlation == "phi == 1",], aes(n, rr)) + 
   geom_line(aes(linetype = as.factor(Method))) + 
   geom_point() + facet_grid(cols = vars(data), rows = vars(correlation), labeller = label_parsed)  + 
   geom_hline(yintercept = c(0.01, 0.05, 0.10), color = "red") + 
