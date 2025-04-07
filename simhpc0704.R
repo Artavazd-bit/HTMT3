@@ -103,8 +103,8 @@ simnormal2 <- simnormal %>%
             tboot = mean(tboot)
   )
 
-write.csv2(simnormal, "Normalsim2.csv")
-write.csv2(simnormal2, "Normalsimag2.csv")
+write.csv2(simnormal, "Normalsim0704.csv")
+write.csv2(simnormal2, "Normalsimag0704.csv")
 
 ######################### non normal data #####################################
 cl <- parallel::makeCluster(nkernel)
@@ -191,8 +191,8 @@ simnonnormal2 <- simnonnormal %>%
             tboot = mean(tboot)
   )
 
-write.csv2(simnonnormal, "nonnormal2.csv")
-write.csv2(simnonnormal2, "nonnormalsimag2.csv")
+write.csv2(simnonnormal, "nonnormal0704.csv")
+write.csv2(simnonnormal2, "nonnormalsimag0704.csv")
 
 
 
