@@ -14,9 +14,9 @@ simModels <- simModels
 # simModels <- simModels_tau
 #simModels <- simModels_parallel
 
-nkernel <- 16
-nobs <- c(50, 100, 200, 400, 100000)
-simrunnumer <- 1000
+nkernel <- 32
+nobs <- c(50, 100, 200, 400, 800, 1600, 3200, 6400, 12800)
+simrunnumer <- 10000
 testvalue <- 1
 ######################### Normal data ##########################################
 cl <- parallel::makeCluster(nkernel)
