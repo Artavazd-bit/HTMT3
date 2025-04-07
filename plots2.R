@@ -3,11 +3,11 @@ library(gridExtra)
 library(dplyr)
 library(tidyr)
 
-normalsim <- read.csv2("normalsim.csv")
-normalsimag <- read.csv2("normalsimag.csv")
+normalsim <- read.csv2("simresults/testingwith1/normalsim.csv")
+normalsimag <- read.csv2("simresults/testingwith1normalsimag.csv")
 
-nonnormalsim <- read.csv2("nonnormalsim.csv")
-nonormalsimag <- read.csv2("nonnormalsimag.csv")
+nonnormalsim <- read.csv2("simresults/testingwith1/nonnormalsim.csv")
+nonormalsimag <- read.csv2("simresults/testingwith1/nonnormalsimag.csv")
 
 
 normalsim$data <- "normal"
@@ -39,7 +39,7 @@ ggplot(simdataag_long[simdataag_long$correlation != "phi == 1",], aes(n, rr)) +
 
 
 ggplot(simdataag_long[simdataag_long$correlation == "phi == 1",], aes(n, rr)) + 
-  geom_line(aes(linetype = as.factor(Method))) + 
+  geom_line(aes(color = as.factor(Method))) + 
   geom_point() + facet_grid(cols = vars(data), rows = vars(correlation), labeller = label_parsed)  + 
   geom_hline(yintercept = c(0.01, 0.05, 0.10), color = "red") + 
   theme(legend.position="left", legend.title=element_blank()) + ylab("Rejectionrate")
