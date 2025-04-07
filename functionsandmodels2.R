@@ -246,7 +246,7 @@ calcovcor <- function(data) {
 
 
 ########################### Ultimate Function v3################################
-doeverything <- function(data, model, alpha, latent1, latent2, scale, htmt2)
+doeverything <- function(data, model, alpha, latent1, latent2, scale, htmt2, test)
 {
   starttime <- Sys.time()
   gdf <- derivhtmt(data = data, model = model, latent1 = latent1, latent2 = latent2, scale = scale, htmt2 = htmt2)
@@ -257,7 +257,7 @@ doeverything <- function(data, model, alpha, latent1, latent2, scale, htmt2)
     omega <- calcovcor(data = data)
   } else print("ERROR")
   se <- sqrt(t(gradient) %*% omega %*% gradient / nrow(data))[1]
-  zvalue <- (gdf$HTMT - 1)/se
+  zvalue <- (gdf$HTMT - test)/se
   endtime <- Sys.time()
   tdelta <- endtime - starttime
   # here i want to test whether im in the lowest alpha percent cases. 
@@ -273,9 +273,9 @@ doeverything <- function(data, model, alpha, latent1, latent2, scale, htmt2)
 }
 
 
-simFun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = htmt2, seed, bootruns)
+simFun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = htmt2, seed, bootruns, test)
 {
-  delta <- doeverything(data = data, model = model, alpha = alpha, latent1 = latent1, latent2 = latent2, scale = scale, htmt2 = htmt2)
+  delta <- doeverything(data = data, model = model, alpha = alpha, latent1 = latent1, latent2 = latent2, scale = scale, htmt2 = htmt2, test)
   
   
   set.seed(seed)
@@ -287,7 +287,7 @@ simFun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = 
   endtime <- Sys.time()
   tdeltaboot <- endtime - starttime
   
-  bootdec <- bootupperbound < 1
+  bootdec <- bootupperbound < test
   
   list(delta = delta, boot = list(upperbound = bootupperbound, dec = bootdec, time = tdeltaboot))
 }
