@@ -15,6 +15,8 @@ normalsimag$data <- "normal"
 nonnormalsim$data <- "nonnormal"
 nonormalsimag$data <- "nonnormal"
 
+
+
 testcommit
 
 
@@ -32,14 +34,14 @@ simdataag_long <- simdataag %>%
 simdataag_long$correlation <- paste("phi ==", simdataag_long$correlation)
 
 
-ggplot(simdataag_long[simdataag_long$correlation != "phi == 1",], aes(n, rr)) + 
+ggplot(simdataag_long[simdataag_long$correlation != "phi == 1" & simdataag_long$Method %in% c("delta005", "boot005"),], aes(n, rr)) + 
   geom_line(aes(linetype = as.factor(Method))) + 
   geom_point() + facet_grid(cols = vars(data), rows = vars(correlation), labeller = label_parsed)  + 
   geom_hline(yintercept = c( 0.8), color = "red") + 
   theme(legend.position="left", legend.title=element_blank()) + ylab("Rejectionrate")
 
 
-ggplot(simdataag_long[simdataag_long$correlation == "phi == 1",], aes(n, rr)) + 
+ggplot(simdataag_long[simdataag_long$correlation == "phi == 1"& simdataag_long$Method %in% c("delta005", "boot005"),], aes(n, rr)) + 
   geom_line(aes(color = as.factor(Method))) + 
   geom_point() + facet_grid(cols = vars(data), rows = vars(correlation), labeller = label_parsed)  + 
   geom_hline(yintercept = c(0.01, 0.05, 0.10), color = "red") + 
