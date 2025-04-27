@@ -263,10 +263,14 @@ doeverything <- function(data, model, alpha, latent1, latent2, scale, htmt2, tes
   # here i want to test whether im in the lowest alpha percent cases. 
   ztest <- zvalue <  qnorm(p = alpha, mean = 0, sd = 1)
   
+  upperbound <- gdf$HTMT + qnorm(p = 1 - alpha/2, mean = 0, sd = 1)*se
+  lowerbound <- gdf$HTMT - qnorm(p = 1 - alpha/2, mean = 0, sd = 1)*se
+  
+  
   if (htmt2 == FALSE){
-    list(HTMT = gdf$HTMT, zval = zvalue, se = se, dec = ztest, time = tdelta)
+    list(HTMT = gdf$HTMT, zval = zvalue, se = se, dec = ztest, time = tdelta, lowerbound = lowerbound, upperbound = upperbound)
   }else if (htmt2 == TRUE){
-    list(HTMT2 = gdf$HTMT, zval = zvalue, se = se, dec = ztest, time = tdelta)
+    list(HTMT2 = gdf$HTMT, zval = zvalue, se = se, dec = ztest, time = tdelta, lowerbound = lowerbound, upperbound = upperbound)
   }else{
     print("ERROR")
   }
@@ -361,7 +365,7 @@ simModels_tau
 
 ################################################################################
 coefs <- 1
-corr <- c(0.7, 0.8, 0.9, 1)
+corr <- c(0.7, 0.8, 0.9, 0.95, 1)
 param <- expand.grid(loading1 = coefs, loading2 = coefs, correlation = corr)
 simModels <- foreach(i = 1:nrow(param), .combine = "rbind") %do%
   {
