@@ -282,7 +282,7 @@ simFun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = 
   
   set.seed(seed)
   starttime <- Sys.time()
-  bootstrap <- boot(data_cfa, function(data, indices){calchtmt(data = data[indices,], model = model, latent1 = latent1, latent2 = latent2, scale = scale, htmt2 = htmt2)}, R = bootruns)
+  bootstrap <- boot(data, function(data, indices){calchtmt(data = data[indices,], model = model, latent1 = latent1, latent2 = latent2, scale = scale, htmt2 = htmt2)}, R = bootruns)
   bootstrap_htmt_1_se <- sd(bootstrap$t, na.rm = TRUE)
   #here its the other way, i want to test whether the upper bound is below zero
   bootlowerbound <- quantile(bootstrap$t, na.rm = TRUE, probs = alpha/2)
@@ -311,6 +311,12 @@ simModels <- foreach(i = 1:nrow(param), .combine = "rbind") %do%
         , paste("x21 ~~", 0.6, "*x21 + 0*x22 + 0*x23"),"\n"
         , paste("x22 ~~", 0.5, "*x22 + 0*x23"),"\n"
         , paste("x23 ~~", 0.2, "*x23"), "\n"
+        , paste("x11 ~ 0*1"), "\n"
+        , paste("x12 ~ 0*1"), "\n"
+        , paste("x13 ~ 0*1"), "\n"
+        , paste("x21 ~ 0*1"), "\n"
+        , paste("x22 ~ 0*1"), "\n"
+        , paste("x23 ~ 0*1"), "\n"
       )
     save <- data.frame(
       loading_1 = param$loading1[i],
