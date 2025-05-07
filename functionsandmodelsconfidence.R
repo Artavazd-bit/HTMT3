@@ -260,8 +260,8 @@ doeverything <- function(data, model, alpha, latent1, latent2, scale, htmt2)
   # zvalue <- (gdf$HTMT - test)/se
   # here i want to test whether im in the lowest alpha percent cases. 
   # ztest <- zvalue <  qnorm(p = alpha, mean = 0, sd = 1)
-  upperbound <- gdf$HTMT + qnorm(p = 1 - alpha/2, mean = 0, sd = 1)*se
-  lowerbound <- gdf$HTMT - qnorm(p = 1 - alpha/2, mean = 0, sd = 1)*se
+  upperbound <- gdf$HTMT + qnorm(p = 1 - (alpha/2), mean = 0, sd = 1)*se
+  lowerbound <- gdf$HTMT - qnorm(p = 1 - (alpha/2), mean = 0, sd = 1)*se
   endtime <- Sys.time()
   tdelta <- endtime - starttime
   
