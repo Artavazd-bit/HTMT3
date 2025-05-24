@@ -75,3 +75,9 @@ cmpdfag <- cmpdf %>% group_by(method, n) %>% summarize(time  = mean(tme))
 compcmpdf <- pivot_wider(data = cmpdfag, names_from = method, values_from = time)
 
 compcmpdf$savingsinpercent <- (1-(compcmpdf$delta / compcmpdf$boot))*100
+
+
+###############################################################################
+nobs <- 100
+corr <- 0.8
+method <- "CI_delta"
