@@ -186,8 +186,6 @@ calcovcor <- function(data) {
     }
   }
   
-  
-  
   # Function to get position in upper triangular matrix
   get_pos <- function(i, j) {
     if(i > j) {
@@ -290,7 +288,11 @@ simFun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = 
   endtime <- Sys.time()
   tdeltaboot <- endtime - starttime
   
-  list(delta = delta, boot = list(upperbound = bootupperbound, lowerbound = bootlowerbound, time = tdeltaboot))
+  index1 <- length(alpha) + 1
+  index2 <- length(alpha) + length(alpha)
+  bcabootlower <- rms::bootBCa(estimate = bootstrap$t0, estimates = bootstrap$t, n = nrow(data), conf.int = alpha, type = "bca", seed = seed)
+  bcabootupper <- rms::bootBCa(estimate = bootstrap$t0, estimates = bootstrap$t, n = nrow(data), conf.int = 1-alpha, type = "bca", seed = seed)
+  list(delta = delta, boot = list(upperbound = bootupperbound, lowerbound = bootlowerbound, time = tdeltaboot), bcaboot = list(lowerbound = bcabootlower, upperbound = bcabootupper, time = NaN))
 }
 
 ################################################################################
