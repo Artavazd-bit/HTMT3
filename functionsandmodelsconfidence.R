@@ -292,7 +292,7 @@ simFun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = 
   index2 <- length(alpha) + length(alpha)
   bcabootlower <- rms::bootBCa(estimate = bootstrap$t0, estimates = bootstrap$t, n = nrow(data), conf.int = alpha, type = "bca", seed = seed)
   bcabootupper <- rms::bootBCa(estimate = bootstrap$t0, estimates = bootstrap$t, n = nrow(data), conf.int = 1-alpha, type = "bca", seed = seed)
-  list(delta = delta, boot = list(upperbound = bootupperbound, lowerbound = bootlowerbound, time = tdeltaboot), bcaboot = list(lowerbound = bcabootlower, upperbound = bcabootupper, time = NaN))
+  list(delta = delta, boot = list(lowerbound = bootlowerbound, upperbound = bootupperbound, time = tdeltaboot), bcaboot = list(lowerbound = bcabootlower, upperbound = bcabootupper, time = NaN))
 }
 
 ################################################################################
@@ -327,9 +327,11 @@ simModels <- foreach(i = 1:nrow(param), .combine = "rbind") %do%
       model = simCommonFactor
     )
     save
+    rm(save, simCommonFactor, i)
   }
 simModels
 
+rm(coefs, corr, param)
 ###############################################################################
 
 model_est<- '

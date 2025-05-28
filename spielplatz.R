@@ -83,11 +83,13 @@ bootstrap <- boot(data, function(data, indices){calchtmt(data = data[indices,], 
 bootlowerbound <- quantile(bootstrap$t, na.rm = TRUE, probs = 0.025)
 bootupperbound <- quantile(bootstrap$t, na.rm = TRUE, probs = 0.975)
 
-bcaboot <- rms::bootBCa(estimate = bootstrap$t0, estimates = bootstrap$t, n = nrow(data), conf.int = c(alphavec, 1-alphavec), seed = seed, type = "bca")
+set.seed(1234)
+bcabootlower <- rms::bootBCa(estimate = bootstrap$t0, estimates = bootstrap$t, n = nrow(data), conf.int = alphavec, type = "bca", seed = 1234)
+bcabootupper <- rms::bootBCa(estimate = bootstrap$t0, estimates = bootstrap$t, n = nrow(data), conf.int = 1-alphavec, type = "bca", seed = 1234)
 
 resag <- simresults %>% 
   group_by(correlation, n, datatype, alpha, method) %>%
   dplyr::summarize(covagcorr = mean(coveragecorr), 
-                   covagone = mean(coverageone), 
+                   covagone = mean(coverageone) 
   ) 
 
