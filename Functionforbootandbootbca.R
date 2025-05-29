@@ -1,11 +1,11 @@
 ################################################################################
 ##                                BootBcA                                     
 ################################################################################
-source("functionsandmodelsconfidence.R")
+# source("functionsandmodelsconfidence.R")
 library(dplyr)
 library(foreach)
 library(doParallel)
-data <- readRDS("exampledata.rds")
+#data <- readRDS("exampledata.rds")
 ################################################################################
 ##              Funktion boot
 ################################################################################
@@ -95,8 +95,7 @@ bootfun <- function(data, nboot, alpha = 0.05, statisticfun, ..., parallel = TRU
   ))
 }
 
-boot <- bootfun(data = data, nboot = 10, alpha = 0.05, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", 
-        latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, parallel = FALSE)
+#boot <- bootfun(data = data, nboot = 10, alpha = c(0.05, 0.1), statisticfun = calchtmt, model = model_est, latent1 = "xi_1", latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, parallel = TRUE)
 ################################################################################
 ## jacknife
 ################################################################################
@@ -185,13 +184,17 @@ jacknifefun <- function(data, statisticfun, ..., parallel = TRUE, cores = NULL, 
     accelerator = accelerator
   ))
 }
-jacknife <- jacknifefun(data = data, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", 
-            latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, alpha = 0.05, parallel = TRUE)
+#jacknife <- jacknifefun(data = data, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, alpha = 0.05, parallel = TRUE)
 ################################################################################
 bootbcafun <- function(data, nboot, alpha = 0.05, statisticfun, ..., parallel = TRUE, cores = NULL){
   statistic <- statisticfun(data, ...)
+  starttime <- Sys.time()
   boot <- bootfun(data, nboot, alpha = alpha, statisticfun, ..., parallel = parallel, cores = cores)
-  #print(boot)
+  endtime <- Sys.time()
+  
+  tdeltaboot <- endtime - starttime
+  
+  starttimebca <- Sys.time()
   z0 <- qnorm(p = mean(boot$table$stat < statistic), mean = 0, sd = 1)
   
   jacknife <- jacknifefun(data, statisticfun, ..., parallel = parallel, cores = cores, alpha = alpha)
@@ -206,9 +209,11 @@ bootbcafun <- function(data, nboot, alpha = 0.05, statisticfun, ..., parallel = 
   
   lowerbound <- unname(quantile(boot$table$stat, probs = a1))
   upperbound <- unname(quantile(boot$table$stat, probs = a2))
+  endtimebca <- Sys.time()
   
-  return(list(lowerbound = lowerbound, upperbound = upperbound))
+  tdeltabootdca <- (endtimebca - starttimebca) + tdeltaboot
+  
+  return(list(boot = list(boot = boot, time = tdeltaboot), bootbca = list(lowerbound = lowerbound, upperbound = upperbound, time = tdeltabootdca)))
 } 
-bootbcafun(data = data, nboot = 10, alpha = 0.05, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", 
-latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, parallel = TRUE)
+#out <- bootbcafun(data = data, nboot = 10, alpha = 0.05, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, parallel = TRUE)
 

@@ -1,6 +1,27 @@
 ########################## Script for functions ################################
-
+## Creator: Jason John Berger (Artavazd-bit)
+## Date: 29.05.2025
+## Info: 
+# This script includes all functions needed for the simulations study to assess 
+# the statistical properties of the HTMT introduced by Henseler et al.(2015)
+# Overview: 
+# derivhtmt: calculates the gradient of the HTMT and HTMT2 (htmt2) and if 
+#             covariances or correlations should be used (scale)
+# calchtmt: calculates the htmt or htmt2 (htmt2) and if correlations or 
+#           covariances should be used.
+# calcovcov: Caluclates the variance covariance matrix of the off diagonal 
+#              non-redundant covariances. 
+# lavnacov: does the same as above but uses a the notation and calculation out 
+#           of the lavaan package.
+# calcovcor: Caluclates the variance covariance matrix of the off diagonal 
+#              non-redundant correlations.
+# doeverything: calculates the confidence intervals and standard errors with the
+#               help of the delta method. The output is the HTMT, the se and the 
+#                lowerbound and upperbound.
+# simFun: 
 ###################### Gradient Calculation HTMT and HTMT2 #####################
+source("Functionforbootandbootbca.R")
+
 derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
   
   model_df <- lavaanify(model)
@@ -294,6 +315,18 @@ simFun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = 
   bcabootupper <- rms::bootBCa(estimate = bootstrap$t0, estimates = bootstrap$t, n = nrow(data), conf.int = 1-alpha, type = "bca", seed = seed)
   list(delta = delta, boot = list(lowerbound = bootlowerbound, upperbound = bootupperbound, time = tdeltaboot), bcaboot = list(lowerbound = bcabootlower, upperbound = bcabootupper, time = NaN))
 }
+################################################################################
+
+deltabootbootbcafun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = htmt2, nboot, parallel)
+{
+  delta <- doeverything(data = data, model = model, alpha = alpha, latent1 = latent1, latent2 = latent2, scale = scale, htmt2 = htmt2)
+  
+  
+  out <- bootbcafun(data = data, nboot = nboot, alpha = alpha, statisticfun = calchtmt, model = model_est, latent1 = latent1, 
+                         latent2 <- latent2, scale = scale, htmt2 = htmt2, parallel = parallel)
+  
+  list(delta = delta, boot = list(lowerbound = out$boot$boot$lowerbound, upperbound = out$boot$boot$upperbound, time = out$boot$time), bcaboot = list(lowerbound = out$bootbca$lowerbound, upperbound = out$bootbca$upperbound, time = out$bootbca$time))
+}
 
 ################################################################################
 coefs <- 1
@@ -327,11 +360,11 @@ simModels <- foreach(i = 1:nrow(param), .combine = "rbind") %do%
       model = simCommonFactor
     )
     save
-    #rm(simCommonFactor, i)
+    #rm(save, simCommonFactor, i)
   }
 simModels
 
-rm(coefs, corr, param, simCommonFactor, i)
+rm(coefs, corr, param, simCommonFactor, save, i)
 ###############################################################################
 
 model_est<- '
