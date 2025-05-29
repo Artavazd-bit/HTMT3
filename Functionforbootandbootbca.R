@@ -5,51 +5,7 @@ source("functionsandmodelsconfidence.R")
 library(dplyr)
 library(foreach)
 library(doParallel)
-################################################################################
-## Normal Bootstrap
-################################################################################
 data <- readRDS("exampledata.rds")
-bootruns <- 10
-
-HTMT_boot <- data.frame(matrix(ncol = 2, nrow = 0))
-name <- c("HTMT_val", "Boot_seed")
-colnames(HTMT_boot) <- name
-
-for(i in 1:bootruns){
-  seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
-  set.seed(seed)
-  datanew <- sample_n(data, nrow(data), replace = TRUE,)
-  HTMT_boot[i, "HTMT_val"] <- calchtmt(data = datanew, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE, htmt2 = FALSE)
-  HTMT_boot[i, "Boot_seed"] <- seed
-  rm(datanew, seed, i)
-}
-
-statistic <- calchtmt(data = data, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE, htmt2 = FALSE)
-HTMT_boot$check <- HTMT_boot$HTMT_val < HTMToriginal
-z0 <- qnorm(p = mean(HTMT_boot$check), mean = 0, sd = 1)
-################################################################################
-## Jackknife
-################################################################################
-HTMT_jackknife <- data.frame(matrix(ncol = 1, nrow = 0))
-colnames(HTMT_jackknife) <- c("HTMT_val")
-for(i in 1:nrow(data)){
-  datanew <- data[-i,]
-  HTMT_jackknife[i, "HTMT_val"] <- calchtmt(data = datanew, model = model_est, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE, htmt2 = FALSE)
-  rm(datanew, i)
-}
-
-meanHTMTjacked <- mean(HTMT_jackknife[, "HTMT_val"])
-HTMT_jackknife$centered <- HTMT_jackknife$HTMT_val - meanHTMTjacked
-HTMT_jackknife$centeredtri <- HTMT_jackknife$centered^3
-HTMT_jackknife$centereddos <- HTMT_jackknife$centered^2
-
-accelerator <- sum(HTMT_jackknife$centeredtri) / (6* (sum(HTMT_jackknife$centereddos))^(3/2))
-
-################################################################################
-## bca
-################################################################################
-
-
 ################################################################################
 ##              Funktion boot
 ################################################################################
@@ -140,7 +96,7 @@ bootfun <- function(data, nboot, alpha = 0.05, statisticfun, ..., parallel = TRU
 }
 
 boot <- bootfun(data = data, nboot = 10, alpha = 0.05, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", 
-        latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, parallel = TRUE)
+        latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, parallel = FALSE)
 ################################################################################
 ## jacknife
 ################################################################################
