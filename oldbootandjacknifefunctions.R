@@ -1,49 +1,38 @@
 ################################################################################
-##                                BootBcA                                     
-################################################################################
-# source("functionsandmodelsconfidence.R")
-library(dplyr)
-library(foreach)
-library(doParallel)
-data <- readRDS("exampledata.rds")
-################################################################################
-##              Funktion boot
-################################################################################
 bootfun <- function(data, nboot, alpha = 0.05, statisticfun, ..., parallel = TRUE, cores = NULL){
   if (parallel) 
-    {
+  {
     if (is.null(cores)) 
-      {
+    {
       cores <- parallel::detectCores() - 1
-      }
+    }
     cl <- parallel::makeCluster(cores)
     doParallel::registerDoParallel(cl)
   }
   
-  
   if(parallel)
   {
-  bootall <- foreach(i = 1:nboot, .combine = "rbind", .packages = c("dplyr", "lavaan", "semTools", "stringr")) %dopar%
-    {
-      seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
-      set.seed(seed)
-      datanew <- dplyr::sample_n(data, nrow(data), replace = TRUE)
-      tryCatch({
-        statistic <- statisticfun(datanew, ...)
-        data.frame(
-          iteration = i,
-          stat = statistic,
-          seed = seed
-        )
-      }, error = function(e){
-        warning(paste("Fehler in Iteration", i , ":", e$message))
-        data.frame(
+    bootall <- foreach(i = 1:nboot, .combine = "rbind", .packages = c("dplyr", "lavaan", "semTools", "stringr")) %dopar%
+      {
+        seed <- round(runif(1, min = 0, max = 100000)*1000, digits = 0)
+        set.seed(seed)
+        datanew <- dplyr::sample_n(data, nrow(data), replace = TRUE)
+        tryCatch({
+          statistic <- statisticfun(datanew, ...)
+          data.frame(
+            iteration = i,
+            stat = statistic,
+            seed = seed
+          )
+        }, error = function(e){
+          warning(paste("Fehler in Iteration", i , ":", e$message))
+          data.frame(
             iteration = i,
             stat = NA,
             seed = seed
-        )
-      })
-    }
+          )
+        })
+      }
   }else{
     bootall <- foreach(i = 1:nboot, .combine = "rbind", .packages = c("dplyr", "lavaan", "stringr")) %do%
       {
@@ -115,26 +104,26 @@ jacknifefun <- function(data, statisticfun, ..., parallel = TRUE, cores = NULL, 
   if(parallel)
   {
     jacknifetab <- foreach(i = 1:nrow(data), .combine = "rbind", .packages = c("dplyr", "lavaan", "stringr")) %dopar%
-    {
-      datanew <- data[-i,]
-      tryCatch({
-        statistic <- statisticfun(datanew, ...)
-        data.frame(
-          iteration = i,
-          stat = statistic
-        )
-      }, error = function(e){
-        warning(paste("Fehler in Iteration", i , ":", e$message))
-        data.frame(
-          iteration = i,
-          stat = NA
-        )
-      })
-    }
+      {
+        datanew <- data[-i,]
+        tryCatch({
+          statistic <- statisticfun(datanew, ...)
+          data.frame(
+            iteration = i,
+            stat = statistic
+          )
+        }, error = function(e){
+          warning(paste("Fehler in Iteration", i , ":", e$message))
+          data.frame(
+            iteration = i,
+            stat = NA
+          )
+        })
+      }
   }else{
     jacknifetab <- foreach(i = 1:nrow(data), .combine = "rbind", .packages = c("dplyr", "lavaan", "stringr")) %do%
       {
-        datanewtab <- data[-i,]
+        datanew <- data[-i,]
         tryCatch({
           statistic <- statisticfun(datanew, ...)
           data.frame(
@@ -151,6 +140,7 @@ jacknifefun <- function(data, statisticfun, ..., parallel = TRUE, cores = NULL, 
       }
   }
   
+  # das ist as problem! ich schließe hier auch den äußeren Loop! 
   if (parallel) {
     parallel::stopCluster(cl)
     closeAllConnections()
@@ -184,7 +174,9 @@ jacknifefun <- function(data, statisticfun, ..., parallel = TRUE, cores = NULL, 
     accelerator = accelerator
   ))
 }
-#jacknife <- jacknifefun(data = data, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, alpha = 0.05, parallel = TRUE)
+#jacknife <- jacknifefun(data = data, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, alpha = 0.05, parallel = FALSE)
+
+
 ################################################################################
 bootbcafun <- function(data, nboot, alpha = 0.05, statisticfun, ..., parallel = TRUE, cores = NULL){
   statistic <- statisticfun(data, ...)
@@ -213,7 +205,7 @@ bootbcafun <- function(data, nboot, alpha = 0.05, statisticfun, ..., parallel = 
   
   tdeltabootdca <- (endtimebca - starttimebca) + tdeltaboot
   
-  return(list(boot = list(boot = boot, time = tdeltaboot), bootbca = list(lowerbound = lowerbound, upperbound = upperbound, time = tdeltabootdca)))
+  return(list(boot = list(lowerbound = boot$lowerbound, upperbound = boot$upperbound, time = tdeltaboot), bootbca = list(lowerbound = lowerbound, upperbound = upperbound, time = tdeltabootdca)))
 } 
 #out <- bootbcafun(data = data, nboot = 10, alpha = 0.05, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE, parallel = TRUE)
-
+###############################################################################

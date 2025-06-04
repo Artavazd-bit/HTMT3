@@ -1,26 +1,3 @@
-########################## Script for functions ################################
-## Creator: Jason John Berger (Artavazd-bit)
-## Date: 29.05.2025
-## Info: 
-# This script includes all functions needed for the simulations study to assess 
-# the statistical properties of the HTMT introduced by Henseler et al.(2015)
-# Overview: 
-# derivhtmt: calculates the gradient of the HTMT and HTMT2 (htmt2) and if 
-#             covariances or correlations should be used (scale)
-# calchtmt: calculates the htmt or htmt2 (htmt2) and if correlations or 
-#           covariances should be used.
-# calcovcov: Caluclates the variance covariance matrix of the off diagonal 
-#              non-redundant covariances. 
-# lavnacov: does the same as above but uses a the notation and calculation out 
-#           of the lavaan package.
-# calcovcor: Caluclates the variance covariance matrix of the off diagonal 
-#              non-redundant correlations.
-# doeverything: calculates the confidence intervals and standard errors with the
-#               help of the delta method. The output is the HTMT, the se and the 
-#                lowerbound and upperbound.
-# simFun: 
-###################### Gradient Calculation HTMT and HTMT2 #####################
-source("Functionforbootandbootbca.R")
 
 derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
   
@@ -122,7 +99,6 @@ calchtmt <- function(data, model, latent1, latent2, scale, htmt2){
   }
   return(HTMT)
 }
-
 
 ############################# Calculation of Omega ############################# 
 calcovcov <- function(data) {
@@ -261,9 +237,6 @@ calcovcor <- function(data) {
   
   return(vc_r)
 }
-
-
-
 ########################### Ultimate Function v3################################
 doeverything <- function(data, model, alpha, latent1, latent2, scale, htmt2)
 {
@@ -297,8 +270,6 @@ doeverything <- function(data, model, alpha, latent1, latent2, scale, htmt2)
 simFun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = htmt2, seed, bootruns)
 {
   delta <- doeverything(data = data, model = model, alpha = alpha, latent1 = latent1, latent2 = latent2, scale = scale, htmt2 = htmt2)
-  
-  
   set.seed(seed)
   starttime <- Sys.time()
   bootstrap <- boot(data, function(data, indices){calchtmt(data = data[indices,], model = model, latent1 = latent1, latent2 = latent2, scale = scale, htmt2 = htmt2)}, R = bootruns)
@@ -317,15 +288,12 @@ simFun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = 
 }
 ################################################################################
 
-deltabootbootbcafun <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = htmt2, nboot, parallel)
+wrapper <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 = htmt2, nboot)
 {
   delta <- doeverything(data = data, model = model, alpha = alpha, latent1 = latent1, latent2 = latent2, scale = scale, htmt2 = htmt2)
-  
-  
-  out <- bootbcafun(data = data, nboot = nboot, alpha = alpha, statisticfun = calchtmt, model = model_est, latent1 = latent1, 
-                         latent2 <- latent2, scale = scale, htmt2 = htmt2, parallel = parallel)
-  
-  list(delta = delta, boot = list(lowerbound = out$boot$boot$lowerbound, upperbound = out$boot$boot$upperbound, time = out$boot$time), bcaboot = list(lowerbound = out$bootbca$lowerbound, upperbound = out$bootbca$upperbound, time = out$bootbca$time))
+  out <- bootbca(data = data, nboot = nboot, alpha = alpha, statisticfun = calchtmt, model = model_est, latent1 = latent1, 
+                         latent2 <- latent2, scale = scale, htmt2 = htmt2)
+  list(delta = delta, boot = list(lowerbound = out$boot$lowerbound, upperbound = out$boot$upperbound, time = out$boot$time), bcaboot = list(lowerbound = out$bootbca$lowerbound, upperbound = out$bootbca$upperbound, time = out$bootbca$time))
 }
 
 ################################################################################
@@ -365,8 +333,7 @@ simModels <- foreach(i = 1:nrow(param), .combine = "rbind") %do%
 simModels
 
 rm(coefs, corr, param, simCommonFactor, save, i)
-###############################################################################
-
+################################################################################
 model_est<- '
               #  latent variables
                 xi_1 =~ x11 + x12 + x13
@@ -374,5 +341,71 @@ model_est<- '
                 
                 xi_1 ~~ xi_2
               ' 
+################################################################################
+## new jacknife and bootstrap function much faster !!! 
+################################################################################
+jacknife <- function(data, statisticfun, ...,  alpha = 0.05)
+{
+  ind <- c(1:nrow(data)) 
+  jack <- sapply(ind, function(x) statisticfun(data = data[-x,],...))  
+  valid_jack <- jack[!is.na(jack)]
+  lowerboundb <- unname(quantile(valid_jack, probs = alpha/2))
+  upperboundb <- unname(quantile(valid_jack, probs = 1 - (alpha/2)))
+  jackmean <- mean(valid_jack)
+  jacksd <- sd(valid_jack)
+  statcentered <- jack - jackmean
+  statcenteredsq <- (statcentered)^2
+  statcenteredthree <- (statcentered)^3
+  sumthree <- sum(statcenteredthree)
+  sumsq <- sum(statcenteredsq)
+  accelerator <- sumthree / (6*sumsq^(3/2))
+  return(list(jacktab = jack, 
+              mean = jackmean, 
+              sd = jacksd, 
+              accelerator = accelerator, 
+              lowerbound = lowerboundb, 
+              upperbound = upperboundb
+              ))
+}
 
+bootstrap <- function(data, statisticfun, ...,  alpha = 0.05, nboot)
+{
+  boot <- sapply(1:nboot, function(x) statisticfun(data = dplyr::sample_n(data, nrow(data), replace = TRUE), ...))
+  valid_boot <- boot[!is.na(boot)]
+  lowerbound <- unname(quantile(valid_boot, probs = alpha/2))
+  upperbound <- unname(quantile(valid_boot, probs = 1 - (alpha/2)))
+  bootmean <- mean(valid_boot)
+  bootsd <- sd(valid_boot)
+  return(list(
+    boot = boot,
+    lowerbound = lowerbound, 
+    upperbound = upperbound,
+    mean = bootmean, 
+    sd = bootsd,
+    n_total = nboot,
+    alpha = alpha
+  ))
+}
 
+ bootbca <- function(data, nboot, alpha = 0.05, statisticfun, ...){
+   statistic <- statisticfun(data, ...)
+   starttime <- Sys.time()
+   boot <- bootstrap(data, nboot = nboot, alpha = alpha, statisticfun, ...)
+   endtime <- Sys.time()
+   tdeltaboot <- endtime - starttime
+   z0 <- qnorm(p = mean(boot$boot < statistic), mean = 0, sd = 1)
+   starttimebca <- Sys.time()
+   jacknife <- jacknife(data, alpha = alpha, statisticfun, ...)
+   acc <- jacknife$accelerator
+   zalpha <- qnorm(p = alpha)
+   zalpha2 <- qnorm(p = 1-alpha)
+   a1 <- pnorm(q = (z0 + (z0 + zalpha)/(1-acc*(z0+zalpha))), sd = 1, mean = 0)
+   a2 <- pnorm(q = (z0 + (z0 + zalpha2)/(1-acc*(z0+zalpha2))), sd = 1, mean = 0)
+   lowerbound <- unname(quantile(boot$boot, probs = a1))
+   upperbound <- unname(quantile(boot$boot, probs = a2))
+   endtimebca <- Sys.time()
+   tdeltabootdca <- (endtimebca - starttimebca) + tdeltaboot
+   return(list(boot = list(lowerbound = boot$lowerbound, upperbound = boot$upperbound, time = tdeltaboot), bootbca = list(lowerbound = lowerbound, upperbound = upperbound, time = tdeltabootdca)))
+ } 
+ out <- bootbca(data = data, nboot = 500, alpha = 0.05, statisticfun = calchtmt, model = model_est, latent1 = "xi_1", latent2 <- "xi_2", scale = FALSE, htmt2 = FALSE)
+ 
