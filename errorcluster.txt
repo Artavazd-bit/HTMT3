@@ -3224,3 +3224,134 @@ par% sequentially: no parallel backend registered
 Ausführung angehalten
 Ausführung angehalten
 Ausführung angehalten
+starting worker pid=21296 on localhost:11564 at 08:19:50.606
+starting worker pid=18116 on localhost:11564 at 08:19:50.849
+starting worker pid=31440 on localhost:11564 at 08:19:51.082
+starting worker pid=23140 on localhost:11564 at 08:19:51.330
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Fehler in unsZusätzlich: $con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Warnmeldung:
+Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Ausführung angehalten
+starting worker pid=32064 on localhost:11564 at 08:29:46.901
+starting worker pid=9688 on localhost:11564 at 08:29:47.173
+starting worker pid=2720 on localhost:11564 at 08:29:47.399
+starting worker pid=21548 on localhost:11564 at 08:29:47.612
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+
+Attache Paket: 'dplyr'
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Fehler in unserialize(node$con) : Lesefehler aus VerbinFehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryFehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: ngehalten
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Ausführung angehalten

@@ -375,8 +375,8 @@ bootbca <- function(data, nboot, alpha = 0.05, statisticfun, ...){
   starttimebca <- Sys.time()
   jacknife <- jacknife(data, alpha = alpha, statisticfun, ...)
   acc <- jacknife$accelerator
-  zalpha <- qnorm(p = alpha)
-  zalpha2 <- qnorm(p = 1-alpha)
+  zalpha <- qnorm(p = alpha/2)
+  zalpha2 <- qnorm(p = 1-(alpha/2))
   a1 <- pnorm(q = (z0 + (z0 + zalpha)/(1-acc*(z0+zalpha))), sd = 1, mean = 0)
   a2 <- pnorm(q = (z0 + (z0 + zalpha2)/(1-acc*(z0+zalpha2))), sd = 1, mean = 0)
   lowerbound <- unname(quantile(boot$boot, probs = a1))

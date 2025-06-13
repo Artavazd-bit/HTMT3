@@ -10,10 +10,10 @@ source("setup.R")
 ##################### Simulation Design ########################################
 simModels <- simModels
 nkernel <- 32
-nobs <- c(25, 50, 100, 200, 400, 800)
+nobs <- c(100, 200, 400)
 simrunstotal <- 10000
 bootruns <- 500
-alphavec <- c(0.01, 0.05, 0.10)
+alphavec <- c(0.01, 0.05, 0.1)
 disttable <- data.frame(name = c("normal", "nonnormal"))
 disttable$skewness <- list(NULL, c(0.7, 0.9, 1.2, 1.5, 0.8, 1.3))
 disttable$kurtosis <- list(NULL, c(3.5, 3.6, 3.7, 3.5, 3.6, 3.7))
@@ -70,5 +70,4 @@ simresults <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "foreach",
     temp
   }
 closeAllConnections()
-write.csv2(simresults, "HTMTsimresults.csv")
-
+write.csv2(simresults, "HTMTsimresults100200400.csv")
