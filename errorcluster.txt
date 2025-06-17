@@ -3355,3 +3355,738 @@ Zusätzlich: Warnmeldung:
 Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
 Ausführung angehalten
 Ausführung angehalten
+starting worker pid=1036 on localhost:11726 at 10:28:53.027
+starting worker pid=4992 on localhost:11726 at 10:28:53.321
+starting worker pid=2080 on localhost:11726 at 10:28:53.537
+starting worker pid=1688 on localhost:11726 at 10:28:53.801
+starting worker pid=3532 on localhost:11726 at 10:28:54.077
+starting worker pid=11588 on localhost:11726 at 10:28:54.385
+starting worker pid=18556 on localhost:11726 at 10:28:54.659
+starting worker pid=20612 on localhost:11726 at 10:28:54.953
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+
+Attache Paket: 'dplyr'
+
+
+Attache Paket: 'dplyr'
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+
+Attache Paket: 'dplyr'
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+starting worker pid=22296 on localhost:11726 at 10:30:58.960
+starting worker pid=17204 on localhost:11726 at 10:30:59.175
+starting worker pid=15788 on localhost:11726 at 10:30:59.393
+starting worker pid=2924 on localhost:11726 at 10:30:59.619
+starting worker pid=9872 on localhost:11726 at 10:30:59.854
+starting worker pid=18832 on localhost:11726 at 10:31:00.084
+starting worker pid=17744 on localhost:11726 at 10:31:00.307
+starting worker pid=2616 on localhost:11726 at 10:31:00.555
+starting worker pid=13448 on localhost:11726 at 10:31:11.895
+starting worker pid=3604 on localhost:11726 at 10:31:12.186
+starting worker pid=21616 on localhost:11726 at 10:31:12.455
+starting worker pid=17956 on localhost:11726 at 10:31:12.760
+starting worker pid=16252 on localhost:11726 at 10:31:13.041
+starting worker pid=12320 on localhost:11726 at 10:31:13.323
+starting worker pid=10948 on localhost:11726 at 10:31:13.623
+starting worker pid=12920 on localhost:11726 at 10:31:13.934
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Ausführung angehalten
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Ausführung angehalten
+starting worker pid=22432 on localhost:11726 at 10:42:09.383
+starting worker pid=12536 on localhost:11726 at 10:42:09.718
+starting worker pid=14964 on localhost:11726 at 10:42:10.006
+starting worker pid=13140 on localhost:11726 at 10:42:10.270
+starting worker pid=3088 on localhost:11726 at 10:42:10.551
+starting worker pid=10696 on localhost:11726 at 10:42:10.816
+starting worker pid=22356 on localhost:11726 at 10:42:11.074
+starting worker pid=2056 on localhost:11726 at 10:42:11.312
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+starting worker pid=2288 on localhost:11726 at 10:47:16.121
+starting worker pid=4432 on localhost:11726 at 10:47:16.348
+starting worker pid=17716 on localhost:11726 at 10:47:16.576
+starting worker pid=6760 on localhost:11726 at 10:47:16.813
+starting worker pid=10276 on localhost:11726 at 10:47:17.081
+starting worker pid=9456 on localhost:11726 at 10:47:17.306
+starting worker pid=16672 on localhost:11726 at 10:47:17.537
+starting worker pid=20640 on localhost:11726 at 10:47:17.762
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+starting worker pid=4164 on localhost:11726 at 11:10:05.338
+starting worker pid=22352 on localhost:11726 at 11:10:05.771
+starting worker pid=13972 on localhost:11726 at 11:10:06.163
+starting worker pid=16544 on localhost:11726 at 11:10:06.556
+starting worker pid=16100 on localhost:11726 at 11:10:06.946
+starting worker pid=3996 on localhost:11726 at 11:10:07.325
+starting worker pid=22252 on localhost:11726 at 11:10:07.718
+starting worker pid=21224 on localhost:11726 at 11:10:08.180
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+This is lavaan 0.6-20.2279
+lavaan is FREE software! Please report any bugs.
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attache Paket: 'dplyr'
+
+Die folgenden Objekte sind maskiert von 'package:stats':
+
+    filter, lag
+
+Die folgenden Objekte sind maskiert von 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Zusätzlich: Warnmeldung:
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Warnmeldung:
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Zusätzlich: Warnmeldung:
+' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Zusätzlich: Ausführung angehalten
+Warnmeldung:
+Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Ausführung angehalten
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Zusätzlich: Warnmeldung:
+Warnmeldung:
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Zusätzlich: Warnmeldung:
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Ausführung angehalten
+Warnmeldung:
+Ausführung angehalten
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten
+Ausführung angehalten
+Ausführung angehalten
+Fehler in unserialize(node$con) : Lesefehler aus Verbindung
+Ruft auf: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Zusätzlich: Warnmeldung:
+Ausführung angehalten
+Paket 'foreach' wurde unter R Version 4.4.2 erstellt 
+Ausführung angehalten

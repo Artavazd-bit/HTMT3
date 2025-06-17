@@ -318,8 +318,8 @@ deltamethod <- function(data, model, alpha, latent1, latent2, scale, htmt2)
 ################################################################################
 jacknife <- function(data, statisticfun, ...,  alpha = 0.05)
 {
-  ind <- c(1:nrow(data)) 
-  jack <- sapply(ind, function(x) statisticfun(data = data[-x,],...))  
+  ind <- seq.int(from = 1, to = nrow(data))
+  jack <- sapply(ind, function(x) statisticfun(data = data[-x, , drop = FALSE],...))  
   valid_jack <- jack[!is.na(jack)]
   lowerboundb <- unname(quantile(valid_jack, probs = alpha/2))
   upperboundb <- unname(quantile(valid_jack, probs = 1 - (alpha/2)))
