@@ -325,7 +325,7 @@ jacknife <- function(data, statisticfun, ...,  alpha = 0.05)
   upperboundb <- unname(quantile(valid_jack, probs = 1 - (alpha/2)))
   jackmean <- mean(valid_jack)
   jacksd <- sd(valid_jack)
-  statcentered <- valid_jack - jackmean
+  statcentered <- jackmean - valid_jack
   statcenteredsq <- (statcentered)^2
   statcenteredthree <- (statcentered)^3
   sumthree <- sum(statcenteredthree)
