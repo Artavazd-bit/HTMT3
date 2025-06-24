@@ -303,9 +303,9 @@ deltamethod <- function(data, model, alpha, latent1, latent2, scale, htmt2)
   tdelta <- endtime - starttime
   
   if (htmt2 == FALSE){
-    list(HTMT = gdf$HTMT, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta)
+    list(HTMT = gdf$HTMT, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta, missing = NA)
   }else if (htmt2 == TRUE){
-    list(HTMT2 = gdf$HTMT, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta)
+    list(HTMT2 = gdf$HTMT, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta, missing = NA)
   }else{
     print("ERROR")
   }
@@ -336,7 +336,8 @@ jacknife <- function(data, statisticfun, ...,  alpha = 0.05)
               sd = jacksd, 
               accelerator = accelerator, 
               lowerbound = lowerboundb, 
-              upperbound = upperboundb
+              upperbound = upperboundb,
+              missing = sum(is.na(jack))
   ))
 }
 ################################################################################
@@ -357,7 +358,7 @@ bootstrap <- function(data, statisticfun, ...,  alpha = 0.05, nboot)
     upperbound = upperbound,
     mean = bootmean, 
     se = bootsd,
-    n_total = nboot,
+    missing = sum(is.na(boot)),
     alpha = alpha
   ))
 }
@@ -386,12 +387,14 @@ bootbca <- function(data, nboot, alpha = 0.05, statisticfun, ...){
   return(list(boot = list(se = boot$se, 
                           lowerbound = boot$lowerbound, 
                           upperbound = boot$upperbound, 
-                          time = tdeltaboot), 
+                          time = tdeltaboot,
+                          missing = boot$missing), 
               bootbca = list(se = boot$se, 
                              jack = jacknife$jacktab,
                              lowerbound = lowerbound, 
                              upperbound = upperbound, 
-                             time = tdeltabootdca)))
+                             time = tdeltabootdca,
+                             missing = jacknife$missing)))
 } 
 ################################################################################
 ## wrapper: used in the simulation script. 
@@ -409,12 +412,14 @@ wrapper <- function(data, model, alpha, latent1, latent2, scale = scale, htmt2 =
   list(delta = delta, 
        boot = list(se = out$boot$se,
                    lowerbound = out$boot$lowerbound, 
-                   upperbound = out$boot$upperbound, 
+                   upperbound = out$boot$upperbound,
+                   missing = out$boot$missing,
                    time = out$boot$time), 
        bcaboot = list(se = out$bootbca$se,
                       lowerbound = out$bootbca$lowerbound, 
                       upperbound = out$bootbca$upperbound, 
-                      time = out$bootbca$time 
+                      time = out$bootbca$time,
+                      missing = out$bootbca$missing
                       ))
 }
 ################################################################################

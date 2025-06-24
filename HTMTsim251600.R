@@ -47,6 +47,7 @@ simresults <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "foreach",
             seHTMT <- simuresults[[type]]$se
             lowerbound <- unname(simuresults[[type]]$lowerbound[indexgamma])
             upperbound <- unname(simuresults[[type]]$upperbound[indexgamma])
+            missing <- unname(simuresults[[type]]$missing)
             time <- simuresults[[type]]$time
             row <- data.frame(correlation = correlation
                               , n = n
@@ -62,6 +63,7 @@ simresults <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "foreach",
                               , coverageone =  lowerbound < 1 & 1 < upperbound
                               , time = time
                               , seed = seed
+                              , missing = missing 
             )
             row
           }
