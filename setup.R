@@ -1,6 +1,5 @@
 ########################## Script for functions ################################
-## Creator: Jason John Berger (Artavazd-bit)
-## Date: 29.05.2025
+## Date: 25.06.2025
 ## Info: 
 # This script includes all functions needed for the simulations study to assess 
 # the statistical properties of the HTMT introduced by Henseler et al.(2015)
