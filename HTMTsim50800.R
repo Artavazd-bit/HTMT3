@@ -1,3 +1,8 @@
+################################################################################
+## simulation script for samplesizes 50, 800
+## including libpaths for running on HPC
+## setup.R includes all functions used here
+## #############################################################################
 .libPaths(c("/home/jab49wd/R-projects/R/library", .libPaths()))
 
 library(lavaan)
@@ -14,14 +19,19 @@ nobs <- c(50, 800)
 simrunstotal <- 10000
 bootruns <- 500
 alphavec <- c(0.01, 0.05, 0.1)
+# normal: no skewness, no kurtosis, nonnormal: specified skewness and kurtosis 
+# values 
 disttable <- data.frame(name = c("normal", "nonnormal"))
 disttable$skewness <- list(NULL, c(0.7, 0.9, 1.2, 1.5, 0.8, 1.3))
 disttable$kurtosis <- list(NULL, c(3.5, 3.6, 3.7, 3.5, 3.6, 3.7))
 ######################### Monte Carlo Simulation ###############################
+# initialising cluster 
 cl <- parallel::makeCluster(nkernel, outfile = "errorcluster.txt")
 doParallel::registerDoParallel(cl)
 clusterEvalQ(cl, .libPaths("/home/jab49wd/R-projects/R/library"))
 
+# iteration order: simModels -> samplesize -> 10000 simruns -> 
+# datatype(normal, nonnormal) 
 simresults <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "foreach", "dplyr"), .combine = "rbind", .export = c("jacknife")) %:%
   foreach(n = nobs, .combine = "rbind") %:%
   foreach(sim_runs = 1:simrunstotal, .combine = "rbind") %dopar%

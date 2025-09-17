@@ -302,9 +302,9 @@ deltamethod <- function(data, model, alpha, latent1, latent2, scale, htmt2)
   tdelta <- endtime - starttime
   
   if (htmt2 == FALSE){
-    list(HTMT = gdf$HTMT, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta, missing = NA)
+    list(HTMT = gdf$HTMT, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta, missing = NA, omega = omega)
   }else if (htmt2 == TRUE){
-    list(HTMT2 = gdf$HTMT, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta, missing = NA)
+    list(HTMT2 = gdf$HTMT, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta, missing = NA, omega = omega)
   }else{
     print("ERROR")
   }

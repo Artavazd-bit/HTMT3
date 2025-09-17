@@ -7,7 +7,7 @@ source("2024_01_10_gradient_analytically_of_htmt.R")
 source("2025_19_02_models_3_4.R")
 
 
-data_cfa <- lavaan::simulateData(model = simModels_parallel$model[1], 
+data_cfa <- lavaan::simulateData(model = simModels$model[1], 
                                  model.type = "cfa",
                                  meanstructure = FALSE, # means of observed variables enter the model
                                  int.ov.free = FALSE, # if false, intercepts of observed are fixed to zero
@@ -36,13 +36,6 @@ data_cfa <- lavaan::simulateData(model = simModels_parallel$model[1],
 )
 
 
-model_est <- '
-              #  latent variables
-                xi_1 =~ x11 + x12 + x13 + x14
-                xi_2 =~ x21 + x22 + x23
-                
-                xi_1 ~~ xi_2
-              ' 
 
 head(data_cfa)
 
@@ -75,7 +68,11 @@ cov(data_cfa)*((100-1)/100) - test@cov[[1]]
 # ergibt gleich 0
 
 test@NACOV[[1]]
+
+out <- deltamethod(data = data_cfa, model = model_est, alpha = 0.05, latent1 = "xi_1", latent2 = "xi_2", scale = FALSE, htmt2 = FALSE)
 vc_r[,1] 
+
+identical(out$omega, test@NACOV[[1]])
 
 matrix_A <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), nrow = 3, ncol = 4)
 matrix_B <- matrix(c(9, 8, 7, 6, 5, 4, 3, 2, 1), nrow = 3, ncol = 3)
@@ -98,10 +95,7 @@ nacov <- function(data){
   NACOV <- base::crossprod(Zc) / nrow(data)
   NACOV
 }
-all.equal(nacov(data_cfa), calculate_cov_cov(data_cfa))
-
-
-
+all.equal(nacov(data_cfa), out$omega)
 
 # herausfinden der Indize der unteren Dreiecksmatrix
 
@@ -116,7 +110,26 @@ all.equal(zz, vc_rtest)
 htmt1 <- function(x){
   cor_values = wis(cov(data_cfa), model = model_est, latent1 = "xi_1", latent = "xi_2")
   cor_values$val = x  
-  calc_htmt2(cor_values = cor_values, htmt2 = FALSE)
+  calchtmt(data = data_cfa, model = model_est, latent1 = "xi_1", latent2 = "xi_2",scale = FALSE, htmt2 = FALSE)
+}
+
+
+wis <- function(covdata, model, latent1, latent2){
+  indicators <- extract_indicators(lv1 = latent1, lv2 = latent2, model_syntax = model)
+  
+  all_indicators <- unlist(indicators)
+  
+  cor_subset_data <- covdata
+  ind <- which( lower.tri(cor_subset_data,diag=F) , arr.ind = TRUE )
+  cor_values <- data.frame( col = dimnames(cor_subset_data)[[2]][ind[,2]] ,
+                            row = dimnames(cor_subset_data)[[1]][ind[,1]] ,
+                            val = cor_subset_data[ ind ] )
+  
+  cor_values$type[cor_values$col %in% unlist(indicators[1]) & cor_values$row %in% unlist(indicators[1])] <- "mono1"
+  cor_values$type[cor_values$col %in% unlist(indicators[2]) & cor_values$row %in% unlist(indicators[2])] <- "mono2"
+  cor_values$type[cor_values$col %in% unlist(indicators[1]) & cor_values$row %in% unlist(indicators[2])] <- "het"
+  
+  cor_values
 }
 
 y <- wis(cov(data_cfa), model = model_est, latent1 = "xi_1", latent = "xi_2")
