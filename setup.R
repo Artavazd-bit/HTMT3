@@ -20,8 +20,8 @@ derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
   
   subset_data <- data[, all_indicators]
   
-  # for tau-equivalent assumption use scale = FALSE, for parallel assumption you 
-  # can use scale = TRUE (original version of HTMT)
+  # for tau-equivalent assumption use scale = FALSE, for parallel assumption  
+  # use scale = TRUE (original version of HTMT)
   if(scale == FALSE){
     cor_subset_data <- cov(subset_data)
   } else { 
@@ -35,7 +35,7 @@ derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
                             row = dimnames(cor_subset_data)[[1]][ind[,1]] ,
                             val = cor_subset_data[ ind ] )
   
-  # i need to distinguish between the type of corr/cov values
+  # distinguish between the type of corr/cov values
   cor_values$type[cor_values$col %in% unlist(listind1) & cor_values$row 
                   %in% unlist(listind1)] <- "mono1"
   cor_values$type[cor_values$col %in% unlist(listind2) & cor_values$row 
@@ -47,7 +47,7 @@ derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
   K_j <- length(unlist(listind2))
   
   tryCatch({
-  # Caluclation of HTMT and HTMT2 and (analytical) gradient 
+  # caluclation of HTMT and HTMT2 and (analytical) gradient 
   if (htmt2 == FALSE){
     A = 1/(K_i*K_j) * sum(cor_values$val[cor_values$type == "het"])
     B = 2/(K_i*(K_i-1)) *  sum(cor_values$val[cor_values$type == "mono1"]) 
@@ -91,8 +91,8 @@ derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
 ################################################################################
 ## calchtmt: calculates the htmt or htmt2 (htmt2) and if correlations or 
 #           covariances should be used.
-# i use this function for the bootstrap and bootbca methods. 
-# in the simulation derivhtmt also gives me the HTMT and HTMT2 estimates. 
+# this function is used for the bootstrap and bootbca methods. 
+# derivhtmt also gives me the HTMT and HTMT2 estimates. 
 ################################################################################
 calchtmt <- function(data, model, latent1, latent2, scale, htmt2){
   
@@ -152,7 +152,7 @@ calchtmt <- function(data, model, latent1, latent2, scale, htmt2){
 ################################################################################
 ## calcovcov: Caluclates the variance covariance matrix of the off diagonal 
 #              non-redundant covariances. 
-# i use this function within the delta method function to derive omega for cov-
+# this function is used within the delta method function to derive omega for cov-
 # matrices
 ################################################################################
 calcovcov <- function(data) {
@@ -340,8 +340,10 @@ jacknife <- function(data, statisticfun, ...,  alpha = 0.05)
   ))
 }
 ################################################################################
-## bootstrap: Performs bootstrap for the function (statisticfun) and of the dataset data.
-## returns lowerbound and upperbound the mean and standard deviation of the statistic
+## bootstrap: Performs bootstrap for the function (statisticfun) and of the 
+## dataset data.
+## returns lowerbound and upperbound the mean and standard deviation of the 
+## statistic
 ################################################################################
 bootstrap <- function(data, statisticfun, ...,  alpha = 0.05, nboot)
 {
