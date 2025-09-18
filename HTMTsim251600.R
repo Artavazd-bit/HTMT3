@@ -1,7 +1,7 @@
 ################################################################################
 ## simulation script for samplesizes 25, 1600
 ## including libpaths for running on HPC
-## setup.R includes all functions used here
+## setup.R includes all functions used
 ## #############################################################################
 .libPaths(c("/home/jab49wd/R-projects/R/library", .libPaths()))
 
@@ -32,6 +32,12 @@ clusterEvalQ(cl, .libPaths("/home/jab49wd/R-projects/R/library"))
 
 # iteration order: simModels -> samplesize -> 10000 simruns -> 
 # datatype(normal, nonnormal) 
+# for each simrun a random seed is drawn 
+# for this seed a normal and nonnormal dataset is being created from the specified
+# population model (defined in the setup.R file)
+# the wrapper(...) function creates the percentile, asymptotic and BCa 
+# confidence intervals for multiple confidence levels. 
+
 simresults <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "foreach", "dplyr"), .combine = "rbind", .export = c("jacknife")) %:%
   foreach(n = nobs, .combine = "rbind") %:%
   foreach(sim_runs = 1:simrunstotal, .combine = "rbind") %dopar%
