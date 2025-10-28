@@ -15,7 +15,7 @@ source("setup.R")
 ##################### Simulation Design ########################################
 simModels <- simModels
 nkernel <- 32
-nobs <- c(25, 1600)
+nobs <- c( 1600)
 simrunstotal <- 10000
 bootruns <- 500
 alphavec <- c(0.01, 0.05, 0.1)
