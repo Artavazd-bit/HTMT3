@@ -74,7 +74,7 @@ simresults <- foreach(jj = 1:nrow(simModels), .packages = c("lavaan", "foreach",
                               , alpha = alphavec[indexgamma]
                               , lowerbound = lowerbound
                               , upperbound =  upperbound
-                              , coveragecorr = lowerbound < correlation & correlation <  upperbound
+                              , coveragecorr = lowerbound <= correlation & correlation <=  upperbound
                               , coverageone =  lowerbound < 1 & 1 < upperbound
                               , time = time
                               , seed = seed

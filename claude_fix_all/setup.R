@@ -47,46 +47,46 @@ derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
   K_j <- length(unlist(listind2))
   
   tryCatch({
-  # caluclation of HTMT and HTMT2 and (analytical) gradient 
+  # caluclation of HTMT and HTMT2 and (analytical) gradient
   if (htmt2 == FALSE){
     A = 1/(K_i*K_j) * sum(cor_values$val[cor_values$type == "het"])
-    B = 2/(K_i*(K_i-1)) *  sum(cor_values$val[cor_values$type == "mono1"]) 
-    C = 2/(K_j*(K_j-1)) *  sum(cor_values$val[cor_values$type == "mono2"]) 
+    B = 2/(K_i*(K_i-1)) *  sum(cor_values$val[cor_values$type == "mono1"])
+    C = 2/(K_j*(K_j-1)) *  sum(cor_values$val[cor_values$type == "mono2"])
     HTMT <- A / ((B*C)^(1/2))
-    
+
     cor_values$gradient[cor_values$type == "het"] <- (1/(K_i*K_j) )/((B*C)^(1/2))
     cor_values$gradient[cor_values$type == "mono1"] <- -HTMT * 1/(K_i*(K_i-1)) * B^-1
     cor_values$gradient[cor_values$type == "mono2"] <- -HTMT * 1/(K_j*(K_j-1)) * C^-1
   }
   else if(htmt2 == TRUE){
     A =  prod(cor_values$val[cor_values$type == "het"])^(1/(K_i*K_j))
-    B =  prod(cor_values$val[cor_values$type == "mono1"])^(2/(K_i*(K_i-1))) 
-    C =  prod(cor_values$val[cor_values$type == "mono2"])^(2/(K_j*(K_j-1))) 
+    B =  prod(cor_values$val[cor_values$type == "mono1"])^(2/(K_i*(K_i-1)))
+    C =  prod(cor_values$val[cor_values$type == "mono2"])^(2/(K_j*(K_j-1)))
     HTMT <- A / ((B*C)^(1/2))
-    
-    cor_values$gradient[cor_values$type == "het"] <- (1/(K_i*K_j)) * 
-      prod(cor_values$val[cor_values$type == "het"])^((1/(K_i*K_j))-1) * 
-      prod(cor_values$val[cor_values$type == "het"])/cor_values$val[cor_values$type == "het"] * 
+
+    cor_values$gradient[cor_values$type == "het"] <- (1/(K_i*K_j)) *
+      prod(cor_values$val[cor_values$type == "het"])^((1/(K_i*K_j))-1) *
+      prod(cor_values$val[cor_values$type == "het"])/cor_values$val[cor_values$type == "het"] *
       1/(sqrt((B*C)))
-    cor_values$gradient[cor_values$type == "mono1"] <- A * 1/2 * (2/(K_i*(K_i-1))) * 
-      prod(cor_values$val[cor_values$type == "mono1"])^((2/(K_i*(K_i-1)))-1) * 
-      prod(cor_values$val[cor_values$type == "mono1"])/cor_values$val[cor_values$type == "mono1"] * 
+    cor_values$gradient[cor_values$type == "mono1"] <- A * 1/2 * (2/(K_i*(K_i-1))) *
+      prod(cor_values$val[cor_values$type == "mono1"])^((2/(K_i*(K_i-1)))-1) *
+      prod(cor_values$val[cor_values$type == "mono1"])/cor_values$val[cor_values$type == "mono1"] *
       C * (B*C)^(-3/2) * -1
-    cor_values$gradient[cor_values$type == "mono2"] <- A * 1/2 * (2/(K_j*(K_j-1))) * 
-      prod(cor_values$val[cor_values$type == "mono2"])^((2/(K_j*(K_j-1)))-1) * 
-      prod(cor_values$val[cor_values$type == "mono2"])/cor_values$val[cor_values$type == "mono2"] * 
+    cor_values$gradient[cor_values$type == "mono2"] <- A * 1/2 * (2/(K_j*(K_j-1))) *
+      prod(cor_values$val[cor_values$type == "mono2"])^((2/(K_j*(K_j-1)))-1) *
+      prod(cor_values$val[cor_values$type == "mono2"])/cor_values$val[cor_values$type == "mono2"] *
       B * (B*C)^(-3/2) * -1
   }else{
     print("ERROR")
   }
+  list(output = cor_values, HTMT = HTMT)
   } , error = function(e){
     cat("An error occurred:", e$message, "\n")
-    return(NA)
+    return(list(output = NA, HTMT = NA))
   }, warning = function(w){
     cat("A warning occurred:", w$message, "\n")
-    return(NA)
+    invokeRestart("muffleWarning")
   })
-  list(output = cor_values, HTMT = HTMT)
 } 
 ################################################################################
 ## calchtmt: calculates the htmt or htmt2 (htmt2) and if correlations or 
@@ -208,12 +208,12 @@ calcovcor <- function(data) {
   data_centered <- scale(data, center = TRUE, scale = FALSE)
   data_sd <- apply(data, 2, sd)
   
-  # Create indices for upper triangle
-  indices <- which(upper.tri(matrix(0, p, p)), arr.ind = TRUE)
-  
+  # Create indices for lower triangle (matching derivhtmt and calcovcov)
+  indices <- which(lower.tri(matrix(0, p, p)), arr.ind = TRUE)
+
   # Initialize result matrix
   vc_r <- matrix(0, nrow = size_n, ncol = size_n)
-  
+
   # Pre-calculate all possible products of centered variables
   products <- array(0, dim = c(n, p, p))
   for(i in 1:p) {
@@ -222,56 +222,43 @@ calcovcor <- function(data) {
       products[, j, i] <- products[, i, j]
     }
   }
-  
-  # Function to get position in upper triangular matrix
-  get_pos <- function(i, j) {
-    if(i > j) {
-      temp <- i
-      i <- j
-      j <- temp
-    }
-    return(p*(i-1) - i*(i-1)/2 + j - i)
-  }
-  
+
   # Calculate covariances using vectorized operations
   for(idx1 in 1:nrow(indices)) {
-    x <- indices[idx1, 1]
-    y <- indices[idx1, 2]
+    x <- indices[idx1, "row"]
+    y <- indices[idx1, "col"]
     
     for(idx2 in idx1:nrow(indices)) {
-      z <- indices[idx2, 1]
-      t <- indices[idx2, 2]
-      
-      sd <- sd(data[,x]) * sd(data[,y]) * sd(data[,z]) * sd(data[,t])
-      
-      
+      z <- indices[idx2, "row"]
+      t <- indices[idx2, "col"]
+
+      sd_prod <- sd(data[,x]) * sd(data[,y]) * sd(data[,z]) * sd(data[,t])
+
+
       # Calculate fourth-order moments using pre-computed products
-      mu_xyzt <- mean(products[, x, y] * products[, z, t])  / sd
-      
-      mu_xxzt <- mean(products[, x, x] * products[, z, t]) / sd
-      mu_yyzt <- mean(products[, y, y] * products[, z, t]) / sd
-      mu_xyzz <- mean(products[, x, y] * products[, z, z]) / sd
-      mu_xytt <- mean(products[, x, y] * products[, t, t]) / sd
-      
-      mu_xxtt <- mean(products[, x, x] * products[, t, t]) / sd
-      mu_xxzz <- mean(products[, x, x] * products[, z, z]) / sd
-      mu_yytt <- mean(products[, y, y] * products[, t, t]) / sd
-      mu_yyzz <- mean(products[, y, y] * products[, z, z]) / sd
-      
+      mu_xyzt <- mean(products[, x, y] * products[, z, t])  / sd_prod
+
+      mu_xxzt <- mean(products[, x, x] * products[, z, t]) / sd_prod
+      mu_yyzt <- mean(products[, y, y] * products[, z, t]) / sd_prod
+      mu_xyzz <- mean(products[, x, y] * products[, z, z]) / sd_prod
+      mu_xytt <- mean(products[, x, y] * products[, t, t]) / sd_prod
+
+      mu_xxtt <- mean(products[, x, x] * products[, t, t]) / sd_prod
+      mu_xxzz <- mean(products[, x, x] * products[, z, z]) / sd_prod
+      mu_yytt <- mean(products[, y, y] * products[, t, t]) / sd_prod
+      mu_yyzz <- mean(products[, y, y] * products[, z, z]) / sd_prod
+
       # Get correlation coefficients
       rxy <- cor(data[, x], data[, y])
       rzt <- cor(data[, z], data[, t])
-      
+
       # Calculate covariance
-      cov_val <- (mu_xyzt - 0.5 * rxy * (mu_xxzt + mu_yyzt) - 
-                    0.5 * rzt * (mu_xyzz + mu_xytt) + 
+      cov_val <- (mu_xyzt - 0.5 * rxy * (mu_xxzt + mu_yyzt) -
+                    0.5 * rzt * (mu_xyzz + mu_xytt) +
                     0.25 * rxy * rzt * (mu_xxzz + mu_xxtt + mu_yyzz + mu_yytt))
-      
-      pos1 <- get_pos(x, y)
-      pos2 <- get_pos(z, t)
-      
-      vc_r[pos1, pos2] <- cov_val
-      vc_r[pos2, pos1] <- cov_val  # Matrix is symmetric
+
+      vc_r[idx1, idx2] <- cov_val
+      vc_r[idx2, idx1] <- cov_val  # Matrix is symmetric
     }
   }
   
@@ -347,7 +334,7 @@ jacknife <- function(data, statisticfun, ...,  alpha = 0.05)
 ################################################################################
 bootstrap <- function(data, statisticfun, ...,  alpha = 0.05, nboot)
 {
-  boot <- sapply(1:nboot, function(x) statisticfun(data = dplyr::sample_n(data, nrow(data), replace = TRUE), ...))
+  boot <- sapply(1:nboot, function(x) statisticfun(data = data[sample(nrow(data), nrow(data), replace = TRUE), , drop = FALSE], ...))
   valid_boot <- boot[!is.na(boot)]
   lowerbound <- unname(quantile(valid_boot, probs = alpha/2))
   upperbound <- unname(quantile(valid_boot, probs = 1 - (alpha/2)))
@@ -373,7 +360,9 @@ bootbca <- function(data, nboot, alpha = 0.05, statisticfun, ...){
   boot <- bootstrap(data, nboot = nboot, alpha = alpha, statisticfun, ...)
   endtime <- Sys.time()
   tdeltaboot <- endtime - starttime
-  z0 <- qnorm(p = mean(boot$boot < statistic), mean = 0, sd = 1)
+  prop <- mean(boot$boot < statistic)
+  prop <- max(1/length(boot$boot), min(prop, 1 - 1/length(boot$boot)))
+  z0 <- qnorm(p = prop, mean = 0, sd = 1)
   starttimebca <- Sys.time()
   jacknife <- jacknife(data, alpha = alpha, statisticfun, ...)
   acc <- jacknife$accelerator
