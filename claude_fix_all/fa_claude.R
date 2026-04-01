@@ -28,7 +28,6 @@ library(lavaan)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(doParallel)
 
 source("claude_fix_all/setup.R")
 
