@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J ArrayJob_HTMT
 #SBATCH -p small_cpu
-#SBATCH --array=1-500
+#SBATCH --array=1-900
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=6G
 #SBATCH --output=outfiles/%x_%A_%a.out

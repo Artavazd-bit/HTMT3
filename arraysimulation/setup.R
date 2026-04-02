@@ -46,47 +46,54 @@ derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
   K_i <- length(unlist(listind1))
   K_j <- length(unlist(listind2))
   
-  tryCatch({
-  # caluclation of HTMT and HTMT2 and (analytical) gradient 
-  if (htmt2 == FALSE){
-    A = 1/(K_i*K_j) * sum(cor_values$val[cor_values$type == "het"])
-    B = 2/(K_i*(K_i-1)) *  sum(cor_values$val[cor_values$type == "mono1"]) 
-    C = 2/(K_j*(K_j-1)) *  sum(cor_values$val[cor_values$type == "mono2"]) 
-    HTMT <- A / ((B*C)^(1/2))
-    
-    cor_values$gradient[cor_values$type == "het"] <- (1/(K_i*K_j) )/((B*C)^(1/2))
-    cor_values$gradient[cor_values$type == "mono1"] <- -HTMT * 1/(K_i*(K_i-1)) * B^-1
-    cor_values$gradient[cor_values$type == "mono2"] <- -HTMT * 1/(K_j*(K_j-1)) * C^-1
-  }
-  else if(htmt2 == TRUE){
-    A =  prod(cor_values$val[cor_values$type == "het"])^(1/(K_i*K_j))
-    B =  prod(cor_values$val[cor_values$type == "mono1"])^(2/(K_i*(K_i-1))) 
-    C =  prod(cor_values$val[cor_values$type == "mono2"])^(2/(K_j*(K_j-1))) 
-    HTMT <- A / ((B*C)^(1/2))
-    
-    cor_values$gradient[cor_values$type == "het"] <- (1/(K_i*K_j)) * 
-      prod(cor_values$val[cor_values$type == "het"])^((1/(K_i*K_j))-1) * 
-      prod(cor_values$val[cor_values$type == "het"])/cor_values$val[cor_values$type == "het"] * 
-      1/(sqrt((B*C)))
-    cor_values$gradient[cor_values$type == "mono1"] <- A * 1/2 * (2/(K_i*(K_i-1))) * 
-      prod(cor_values$val[cor_values$type == "mono1"])^((2/(K_i*(K_i-1)))-1) * 
-      prod(cor_values$val[cor_values$type == "mono1"])/cor_values$val[cor_values$type == "mono1"] * 
-      C * (B*C)^(-3/2) * -1
-    cor_values$gradient[cor_values$type == "mono2"] <- A * 1/2 * (2/(K_j*(K_j-1))) * 
-      prod(cor_values$val[cor_values$type == "mono2"])^((2/(K_j*(K_j-1)))-1) * 
-      prod(cor_values$val[cor_values$type == "mono2"])/cor_values$val[cor_values$type == "mono2"] * 
-      B * (B*C)^(-3/2) * -1
-  }else{
-    print("ERROR")
-  }
-  } , error = function(e){
-    cat("An error occurred:", e$message, "\n")
-    return(NA)
-  }, warning = function(w){
-    cat("A warning occurred:", w$message, "\n")
-    return(NA)
-  })
-  list(output = cor_values, HTMT = HTMT)
+  withCallingHandlers(
+    tryCatch({
+    # caluclation of HTMT and HTMT2 and (analytical) gradient
+    if (htmt2 == FALSE){
+      A = 1/(K_i*K_j) * sum(cor_values$val[cor_values$type == "het"])
+      B = 2/(K_i*(K_i-1)) *  sum(cor_values$val[cor_values$type == "mono1"])
+      C = 2/(K_j*(K_j-1)) *  sum(cor_values$val[cor_values$type == "mono2"])
+      HTMT <- A / ((B*C)^(1/2))
+
+      cor_values$gradient[cor_values$type == "het"] <- (1/(K_i*K_j) )/((B*C)^(1/2))
+      cor_values$gradient[cor_values$type == "mono1"] <- -HTMT * 1/(K_i*(K_i-1)) * B^-1
+      cor_values$gradient[cor_values$type == "mono2"] <- -HTMT * 1/(K_j*(K_j-1)) * C^-1
+    }
+    else if(htmt2 == TRUE){
+      A =  prod(cor_values$val[cor_values$type == "het"])^(1/(K_i*K_j))
+      B =  prod(cor_values$val[cor_values$type == "mono1"])^(2/(K_i*(K_i-1)))
+      C =  prod(cor_values$val[cor_values$type == "mono2"])^(2/(K_j*(K_j-1)))
+      HTMT <- A / ((B*C)^(1/2))
+
+      cor_values$gradient[cor_values$type == "het"] <- (1/(K_i*K_j)) *
+        prod(cor_values$val[cor_values$type == "het"])^((1/(K_i*K_j))-1) *
+        prod(cor_values$val[cor_values$type == "het"])/cor_values$val[cor_values$type == "het"] *
+        1/(sqrt((B*C)))
+      cor_values$gradient[cor_values$type == "mono1"] <- A * 1/2 * (2/(K_i*(K_i-1))) *
+        prod(cor_values$val[cor_values$type == "mono1"])^((2/(K_i*(K_i-1)))-1) *
+        prod(cor_values$val[cor_values$type == "mono1"])/cor_values$val[cor_values$type == "mono1"] *
+        C * (B*C)^(-3/2) * -1
+      cor_values$gradient[cor_values$type == "mono2"] <- A * 1/2 * (2/(K_j*(K_j-1))) *
+        prod(cor_values$val[cor_values$type == "mono2"])^((2/(K_j*(K_j-1)))-1) *
+        prod(cor_values$val[cor_values$type == "mono2"])/cor_values$val[cor_values$type == "mono2"] *
+        B * (B*C)^(-3/2) * -1
+    }else{
+      stop("ERROR")
+    }
+      if(is.na(A)) warning("numerator is NaN")
+      if(B < 0) warning("monoblock1 is negative")
+      if(C < 0) warning("monoblock2 is negative")
+      list(output = cor_values, HTMT = HTMT)
+    } , error = function(e){
+      cat("An error occurred:", e$message, "\n")
+      return(list(output = NA, HTMT = NA))
+    }),
+    warning = function(w){
+      cat("Warning:", w$message, "\n")
+      invokeRestart("muffleWarning")
+    }
+  )
+  
 } 
 ################################################################################
 ## calchtmt: calculates the htmt or htmt2 (htmt2) and if correlations or 
@@ -138,7 +145,7 @@ calchtmt <- function(data, model, latent1, latent2, scale, htmt2){
     HTMT <- A / ((B*C)^(1/2))
   }
   else{
-    print("ERROR")
+    stop("ERROR")
   }
     return(HTMT)
   } , error = function(e){
@@ -162,7 +169,7 @@ calcovcov <- function(data) {
   
   data_centered <- scale(data, center = TRUE, scale = FALSE)
   
-  # Create indices for upper triangle
+  # Create indices for lower triangle
   indices <- which(lower.tri(matrix(0, p, p)), arr.ind = TRUE)
   
   # Initialize result matrix
@@ -291,7 +298,7 @@ deltamethod <- function(data, model, alpha, latent1, latent2, scale, htmt2)
     omega <- calcovcov(data = data)
   } else if(scale == TRUE){
     omega <- calcovcor(data = data)
-  } else print("ERROR")
+  } else stop("ERROR")
   se <- sqrt(t(gradient) %*% omega %*% gradient / nrow(data))[1]
   # zvalue <- (gdf$HTMT - test)/se
   # here i want to test whether im in the lowest alpha percent cases. 
@@ -306,7 +313,7 @@ deltamethod <- function(data, model, alpha, latent1, latent2, scale, htmt2)
   }else if (htmt2 == TRUE){
     list(HTMT2 = gdf$HTMT, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta, missing = NA, omega = omega)
   }else{
-    print("ERROR")
+    stop("ERROR")
   }
 }
 
@@ -347,7 +354,7 @@ jacknife <- function(data, statisticfun, ...,  alpha = 0.05)
 ################################################################################
 bootstrap <- function(data, statisticfun, ...,  alpha = 0.05, nboot)
 {
-  boot <- sapply(1:nboot, function(x) statisticfun(data = dplyr::sample_n(data, nrow(data), replace = TRUE), ...))
+  boot <- sapply(1:nboot, function(x) statisticfun(data = dplyr::slice_sample(data, n = nrow(data), replace = TRUE), ...))
   valid_boot <- boot[!is.na(boot)]
   lowerbound <- unname(quantile(valid_boot, probs = alpha/2))
   upperbound <- unname(quantile(valid_boot, probs = 1 - (alpha/2)))

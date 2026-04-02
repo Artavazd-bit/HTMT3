@@ -16,7 +16,7 @@ data <- lavaan::simulateData(model = model,
 set.seed(seed)
 
 data <- lavaan::simulateData(model = simModels$model[5],
-                             sample.nobs = 50,
+                             sample.nobs = 12,
                              seed = NULL,
                              skewness = NULL, 
                              kurtosis = NULL, 

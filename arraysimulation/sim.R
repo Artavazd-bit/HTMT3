@@ -3,7 +3,6 @@
 library(lavaan)
 library(dplyr)
 library(foreach)
-library(covsim)
 library(rvinecopulib)
 
 source("code/setup.R")
@@ -24,7 +23,7 @@ end_rep <- (cond$rep_batch) * reps_per_batch
 
 
 n <- cond$n
-n_id <- match(n, c(50, 100, 250, 1000, 6000))
+n_id <- match(n, c(25, 50, 100, 200, 400, 800, 1600, 3200, 6400))
 model_id <- cond$model
 data_id <- cond$datatype
 current_model <- simModels$model[model_id]
@@ -40,15 +39,8 @@ if(data_id == 1){
 }
 
 if(data_id == 2){
-  fit <- sem(current_model, do.fit = FALSE)
-  popcov <- lavInspect(fit, "implied")$cov
-  marginsxi <- lapply(X = c(4, 5, 6, 4, 5, 6), 
-                      function(X) list(distr = "chisq", df = X))
-  seed_vine <- as.integer(model_id * 100 + n_id)
-  set.seed(seed_vine)
-  vine <- vita(marginsxi, 
-               sigma.target = popcov, 
-               Nmax = 1000000)
+  inputfile <- paste0("~/simulationhtmt/vines/vine_model_", model_id, ".rds")
+  vine <- readRDS(inputfile)
   model_df <- lavaanify(current_model)
   listind1 <- list(model_df$rhs[model_df$lhs == latent1 & model_df$op == "=~"])
   listind2 <- list(model_df$rhs[model_df$lhs == latent2 & model_df$op == "=~"])
@@ -78,14 +70,46 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
           data <- as.data.frame(data)
           colnames(data) <- columnames
         }
-        simuresults <- wrapper(data = data,
-                        model = model_est,
-                        latent1 = latent1,
-                        latent2 = latent2,
-                        alpha = alpha_vec,
-                        scale = FALSE,
-                        htmt2 = FALSE,
-                        nboot = number_bootruns)
+        simuresults <- withCallingHandlers(
+          tryCatch({
+            wrapper(data = data,
+                    model = model_est,
+                    latent1 = latent1,
+                    latent2 = latent2,
+                    alpha = alpha_vec,
+                    scale = FALSE,
+                    htmt2 = FALSE,
+                    nboot = number_bootruns)
+          }, error = function(e){
+            cat("An error occured:", e$message, "\n")
+            list(delta = list(HTMT = NA,
+                              se = NA,
+                              lowerbound = NA,
+                              upperbound = NA,
+                              time = NA,
+                              missing = NA),
+                 boot = list(se = NA,
+                             lowerbound = NA,
+                             upperbound = NA,
+                             missing = NA,
+                             time = NA),
+                 bcaboot = list(se = NA,
+                                lowerbound = NA,
+                                upperbound = NA,
+                                time = NA,
+                                missing = NA),
+                 bcboot = list(se = NA,
+                               lowerbound = NA,
+                               upperbound = NA,
+                               missing = NA,
+                               time = NA))
+          }),
+          warning = function(w){
+            cat("Warning:", w$message, "\n")
+            invokeRestart("muffleWarning")
+          }
+        )
+        
         
         res <- foreach(type = c("delta", "boot", "bcaboot", "bcboot"), .combine = "rbind")%:%
                 foreach(indexgamma = 1:length(alpha_vec), .combine = "rbind") %do%
