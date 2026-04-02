@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(tr ';' '\\\\n')"
+      "Bash(tr ';' '\\\\n')",
+      "Bash(Rscript -e 'cond <- readRDS\\(\"arraysimulation/conditions.rds\"\\); cat\\(\"nrow:\", nrow\\(cond\\), \"\\\\n\"\\); print\\(head\\(cond, 10\\)\\); cat\\(\"\\\\nTail:\\\\n\"\\); print\\(tail\\(cond, 5\\)\\)')"
     ]
   }
 }
