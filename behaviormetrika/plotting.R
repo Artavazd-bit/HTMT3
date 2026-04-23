@@ -9,6 +9,8 @@ dfall <- rbind(df, df2, df3)
 
 rm(df, df2, df3)
 
+dfall <- readRDS("simresults/simresults/aggregated")
+
 dfall$upperwithin <- dfall$correlation < dfall$upperbound
 dfall$lowerwithin <- dfall$correlation > dfall$lowerbound
 

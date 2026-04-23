@@ -3,17 +3,16 @@
 # === Konfiguration ===
 SERVER="jab49wd@julia2.hpc.uni-wuerzburg.de"         
 LOCAL_DIR="C:/Forschung/SEHTMT/HTMT3/arraysimulation/"  # WSL-Pfad
-REMOTE_DIR="/home/jab49wd/simulationhtmt/"             
+REMOTE_DIR="/home/jab49wd/simulationhtmt"             
 SLURM_SCRIPT="submit.sh"
 
-ssh "$SERVER" "mkdir -p $REMOTE_DIR/code $REMOTE_DIR/vines"
+ssh "$SERVER" "mkdir -p $REMOTE_DIR/code $REMOTE_DIR/outfiles $REMOTE_DIR/errorfiles $REMOTE_DIR/results"
 
 # === 1. Ordner zum HPC schieben ===
 echo "sending files to hpc."
 scp -r "$LOCAL_DIR/conditions.rds" "$SERVER:$REMOTE_DIR/code/" &&
 scp -r "$LOCAL_DIR/setup.R" "$SERVER:$REMOTE_DIR/code/" &&
-scp -r "$LOCAL_DIR/sim.R" "$SERVER:$REMOTE_DIR/code/" && 
-scp -r "$LOCAL_DIR/vines/" "$SERVER:$REMOTE_DIR/vines/"
+scp -r "$LOCAL_DIR/sim.R" "$SERVER:$REMOTE_DIR/code/"
 if [ $? -ne 0 ]; then
     echo "upload failed."
     exit 1

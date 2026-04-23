@@ -416,6 +416,82 @@ bootbca <- function(data, nboot, alpha = 0.05, statisticfun, ...){
                             time = tdeltabc, 
                             missing = boot$missing)))
 } 
+#############################################################
+## error handling function
+#############################################################
+jasonssuperdupererrorhandlingfunction <- function(fun, ...){
+  warnings <- list()
+  error <- NA
+  
+  result <- tryCatch(
+    withCallingHandlers(
+      fun(...),
+      warning = function(cond){
+        warnings <<- c(warnings, list(cond))
+        invokeRestart("muffleWarning")
+      }
+    ), 
+    error = function(cond){
+      error <<- conditionMessage(cond)
+      NA
+    }
+  )
+  list(res = result, warnings = warnings, error = error)
+}
+
+
+################################################################################
+## constrained-phi-approach: to check in which cases the model couldnt be computed
+## for the discussion
+################################################################################
+c_phi <- function(model_constrained, model_unconstrained, data){
+  con_model <- jasonssuperdupererrorhandlingfunction(fun = sem, 
+                                                     model = model_constrained, 
+                                                     data = data
+  )
+  uncon_model <- jasonssuperdupererrorhandlingfunction(fun = sem, 
+                                                       model = model_unconstrained, 
+                                                       data = data
+  )
+  
+  
+  if(!inherits(con_model$res, "lavaan") || is.null(con_model$res@Fit@test$standard)){
+    con_ts <- NA
+    con_df <- NA
+  }
+  else{
+    con_ts = con_model$res@Fit@test$standard$stat
+    con_df = con_model$res@Fit@test$standard$df
+  }
+
+  if(!inherits(uncon_model$res, "lavaan") || is.null(uncon_model$res@Fit@test$standard)){
+    uncon_ts <- NA
+    uncon_df <- NA
+  }
+  else{
+    uncon_ts = uncon_model$res@Fit@test$standard$stat
+    uncon_df = uncon_model$res@Fit@test$standard$df
+  }
+  
+  
+  
+  return(list(
+    con_teststat = con_ts,
+    con_df = con_df,
+    
+    uncon_teststat = uncon_ts,
+    uncon_df = uncon_df,
+    
+    con_warning = con_model$warnings,
+    uncon_warning = uncon_model$warnings, 
+    
+    con_error = con_model$error,
+    uncon_error = uncon_model$error
+
+  ))
+}
+
+
 ################################################################################
 ## wrapper: used in the simulation script. 
 # uses the bootbca and deltamethod functions. 
@@ -493,3 +569,14 @@ model_est<- '
                 
                 xi_1 ~~ xi_2
               ' 
+
+model_constrained <- '
+              #  latent variables
+                xi_1 =~ NA*x11 + x12 + x13
+                xi_2 =~ NA*x21 + x22 + x23 
+                
+                xi_1 ~~ 1 * xi_2
+                xi_1 ~~ 1 * xi_1
+                xi_2 ~~ 1 * xi_2
+              ' 
+

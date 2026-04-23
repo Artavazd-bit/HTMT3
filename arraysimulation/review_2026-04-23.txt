@@ -1,0 +1,238 @@
+================================================================================
+CODE REVIEW arraysimulation/ -- 2026-04-23
+================================================================================
+
+Reviewed files:
+  - conditions.R
+  - conditions.rds
+  - failures.R
+  - failures.rds
+  - aggregate_results.R
+  - sim.R
+  - rerunsim.R
+  - setup.R
+  - submit.sh
+  - submitrerun.sh
+  - runarrayjob.sh
+  - plotting.R (skimmed only)
+
+================================================================================
+KRITISCH -- VOR NAECHSTEM HPC-RUN FIXEN
+================================================================================
+
+[K1] rerunsim.R:10 -- n_batches aus failures.rds leitet falsche Reps ab
+--------------------------------------------------------------------------------
+Aktuell:
+    conditions <- readRDS("code/failures.rds")
+    n_batches <- max(conditions$rep_batch)
+
+Problem:
+    Im Original-Run ist n_batches = 10, reps_per_batch = 1000/10 = 100,
+    Batch 5 -> Reps 401-500.
+    Wenn in den Failures z.B. max(rep_batch) = 8 vorkommt, wird im Rerun
+    n_batches = 8, reps_per_batch = 125, Batch 5 -> Reps 501-625.
+    Der Seed haengt direkt von r ab:
+        seed <- r + model_id*10000 + data_id*100000 + n_id*1000000
+    Das heisst: DER RERUN RECHNET ANDERE SIMULATIONEN ALS DAS ORIGINAL.
+    Die Reruns reproduzieren nicht die Failures, sondern generieren
+    neue, nicht vergleichbare Daten.
+
+Fix:
+    n_batches <- 10   # hardcode -- MUST match original sim.R
+
+Impact: Wissenschaftlich falsche Ergebnisse -- hoechste Prioritaet.
+
+--------------------------------------------------------------------------------
+
+[K2] rerunsim.R:195-196 -- alter Save-Pattern ohne Retry/Verify
+--------------------------------------------------------------------------------
+sim.R hat seit 2026-04-23 den robusten Retry-Block (Zeilen 198-216).
+rerunsim.R hat immer noch:
+    saveRDS(partial, tmpfile, version = 2)
+    file.rename(tmpfile, outfile)
+
+Gerade die Faelle, die rerunsim.R abarbeitet, sind die, die beim Original
+wegen Filesystem-Problemen korrupt geworden sind. Ohne Retry/Verify werden
+die Reruns genauso scheitern.
+
+Fix: Den Block aus sim.R:198-216 in rerunsim.R kopieren.
+
+--------------------------------------------------------------------------------
+
+[K3] failures.rds wird nicht auf den HPC hochgeladen
+--------------------------------------------------------------------------------
+runarrayjob.sh:13-15 laedt nur conditions.rds, setup.R, sim.R hoch.
+rerunsim.R:9 tut aber:
+    conditions <- readRDS("code/failures.rds")
+
+Die Datei existiert auf dem Cluster gar nicht -> Rerun stirbt mit
+"cannot open file 'code/failures.rds'".
+
+Fix: Eigenes runrerunjob.sh, das failures.rds und rerunsim.R hochlaedt,
+ODER runarrayjob.sh um diese Dateien erweitern.
+
+--------------------------------------------------------------------------------
+
+[K4] submit.sh und submitrerun.sh -- kein `module load R`
+--------------------------------------------------------------------------------
+submit.sh:15-17:
+    echo "Running Task: ..."
+    R --version
+    srun Rscript code/sim.R
+
+Fehlt: `module load R` davor. Wenn die Compute-Nodes R nicht per Default
+im PATH haben, schlaegt der Job sofort fehl. submitrerun.sh hat das
+gleiche Problem.
+
+Fix: Vor `R --version` einfuegen:
+    module load R
+
+--------------------------------------------------------------------------------
+
+[K5] ~/simulationhtmt/results/rerun/ Directory wird nie angelegt
+--------------------------------------------------------------------------------
+runarrayjob.sh:9 erstellt:
+    results, outfiles, errorfiles, code
+Aber nicht:
+    results/rerun
+
+rerunsim.R:192 schreibt nach ~/simulationhtmt/results/rerun/...
+Wenn Directory fehlt -> saveRDS scheitert.
+
+Fix: In runarrayjob.sh (oder im Rerun-Launcher) ergaenzen:
+    mkdir -p $REMOTE_DIR/results/rerun
+
+
+================================================================================
+WICHTIG -- LOGIK / WORKFLOW
+================================================================================
+
+[W1] aggregate_results.R ignoriert results/rerun/
+--------------------------------------------------------------------------------
+aggregate_results.R:9:
+    results_dir <- "simresults/2026_04_22_arrayresults/results2test/results"
+    files <- list.files(results_dir, pattern = "\\.rds$", full.names = TRUE)
+
+Greift nur auf einen Ordner zu. Rerun-Ergebnisse aus results/rerun/
+landen NIE in der finalen Aggregation.
+
+Fix-Idee:
+    files <- list.files(results_dir, pattern = "\\.rds$",
+                        recursive = TRUE, full.names = TRUE)
+Plus: Dedup-Logik einbauen -- wenn Original UND Rerun fuer dieselbe
+Kondition existieren, soll Rerun gewinnen.
+
+--------------------------------------------------------------------------------
+
+[W2] Kein task_id-Sanity-Check in sim.R / rerunsim.R
+--------------------------------------------------------------------------------
+    task_id <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
+    cond <- conditions[task_id, ]
+
+Wenn SLURM_ARRAY_TASK_ID nicht gesetzt (-> NA) oder > nrow(conditions),
+ist cond eine Zeile voller NAs. Dann laeuft der Job stundenlang auf
+Muell-Parametern, ohne zu merken, dass er nichts Sinnvolles tut.
+
+Fix (unter Zeile 13 einfuegen):
+    if(is.na(task_id) || task_id < 1 || task_id > nrow(conditions))
+      stop("Invalid task_id: ", task_id,
+           " (nrow(conditions) = ", nrow(conditions), ")")
+
+--------------------------------------------------------------------------------
+
+[W3] submitrerun.sh:4 hartkodiert --array=1-96
+--------------------------------------------------------------------------------
+Die 96 muss exakt nrow(failures.rds) sein. Beim naechsten Rerun-Zyklus
+(andere Anzahl Failures) vergisst man das leicht -> Jobs laufen nicht,
+oder laufen mit NA-Rows (siehe W2).
+
+Fix-Ideen:
+  (a) failures.R am Ende ausgeben lassen, was man eintragen muss:
+        cat("sbatch --array=1-", nrow(failures), "\n", sep="")
+  (b) Oder: submitrerun.sh dynamisch bauen:
+        sbatch --array=1-$(Rscript -e 'cat(nrow(readRDS("code/failures.rds")))')
+
+--------------------------------------------------------------------------------
+
+[W4] submit.sh und submitrerun.sh haben denselben Jobnamen
+--------------------------------------------------------------------------------
+Beide: `#SBATCH -J ArrayJob_HTMT`
+In `squeue -u $USER` sieht man nicht, was Originallauf vs. Rerun ist.
+
+Fix: submitrerun.sh -> `#SBATCH -J ArrayJob_HTMT_Rerun`
+
+
+================================================================================
+MINOR / STYLE
+================================================================================
+
+[M1] Code-Duplikation: flat_cond
+     sim.R:46-49 und rerunsim.R:46-49 definieren dieselbe Funktion.
+     Sollte in setup.R gehoeren.
+
+[M2] saveRDS(..., version = 2) ist Pre-R-3.5.0-Format
+     Default version = 3 ist seit R 3.5 Standard und etwas effizienter.
+     Aendern nur, wenn du nicht verschiedene Formate im selben Archiv mischen
+     willst.
+
+[M3] Typo "occured" statt "occurred"
+     sim.R:85, rerunsim.R:83, setup.R:88, setup.R:152
+
+[M4] runarrayjob.sh nutzt Windows-Pfadformat C:/...
+     Funktioniert in Git Bash, nicht in echtem WSL (braucht /mnt/c/...).
+     Dokumentieren oder portabel machen.
+
+[M5] runarrayjob.sh:42 hat `read -p` am Ende
+     Blockiert bei Automatisierung. Fuer manuelles Starten ok.
+
+[M6] aggregate_results.R:9 hartkodierter datierter Pfad
+     "simresults/2026_04_22_arrayresults/results2test/results"
+     Sehr spezifisch, musst du bei jedem neuen Lauf manuell aendern.
+     Als Variable oben im Skript parameterisieren.
+
+[M7] Indentation in sim.R ist teilweise gemischt (6 vs 8 spaces in der
+     foreach-Body). Keine Funktionsauswirkung, nur Lesbarkeit.
+
+
+================================================================================
+POSITIVES -- WAS SAUBER IST
+================================================================================
+
++ Deterministische Seed-Konstruktion aus (r, model_id, data_id, n_id)
+  -> Reproduzierbarkeit gegeben (wenn K1 gefixt ist).
+
++ Error- und Warning-Capturing via withCallingHandlers + tryCatch
+  um den wrapper-Call ist sauber.
+
++ Flattening-Logik fuer list-valued Warnings/Errors (sim.R:117-124)
+  ist gut kommentiert und verhindert Type-Mismatches beim rbind.
+
++ aggregate_results.R mit separater Failure-CSV und defensivem read_one
+  ist ein gutes, defensives Pattern.
+
++ failures.R -> failures.rds als strukturierter Rerun-Grid ist eine
+  saubere Idee (WENN K1 gefixt ist).
+
++ Write-via-tmp-then-rename in sim.R: richtige Grundidee (Atomicity).
+
++ sim.R hat seit 2026-04-23 einen robusten Retry-Save-Block, der
+  truncated/missing tmp Files erkennt und aussagekraeftig abbricht.
+
+
+================================================================================
+TOP-3 PRIORITAETEN
+================================================================================
+
+1. K1 -- n_batches Bug in rerunsim.R
+   (sonst sind alle Reruns wissenschaftlich wertlos)
+
+2. K2 + K5 -- Retry-Save in rerunsim.R + Directory anlegen
+   (sonst scheitern die Reruns aus den gleichen Gruenden wie das Original)
+
+3. W1 -- Aggregation nimmt results/rerun/ nicht auf
+   (sonst sammelst du Rerun-Daten, die nie in die Analyse einfliessen)
+
+
+================================================================================
+ENDE DES REVIEWS
+================================================================================

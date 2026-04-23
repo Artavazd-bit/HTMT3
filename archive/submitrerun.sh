@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J ArrayJob_HTMT
 #SBATCH -p small_cpu
-#SBATCH --array=1-900
+#SBATCH --array=1-96
 #SBATCH --qos=cpu
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=6G
@@ -13,5 +13,5 @@
 
 
 echo "Running Task: ${SLURM_ARRAY_TASK_ID} on host $(hostname)"
-R --version
-srun Rscript code/sim.R
+module load R
+srun Rscript code/rerunsim.R
