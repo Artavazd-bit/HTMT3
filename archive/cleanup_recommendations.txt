@@ -1,0 +1,107 @@
+Cleanup recommendations for sim.R / setup.R
+=============================================
+
+Context: after fixes #1 (guard parameterestimates against failed unconstrained
+fit) and #2 (df = con_df - uncon_df in pchisq) were applied, the r-body in
+sim.R still has some awkwardness worth revisiting.
+
+
+What's awkward in the current block
+-----------------------------------
+- Two parameterestimates() calls on the same fit object, plus est/se
+  extraction repeated in two places behind the same uncon_valid guard.
+- parameterestimates is called once per alpha just to get CIs that are really
+  just est +/- qnorm(1 - alpha/2) * se (lavaan computes them the same way
+  when se = "standard").
+- The conphirow data.frame and the htmt row data.frame share 24 of 25
+  columns. Easy place for future drift -- we already saw seHTMT -> se_cor_est
+  slip through during an earlier edit.
+- Inner foreach over `type` is really just a lookup across a named list; it
+  doesn't need foreach machinery.
+- uncon_valid flag plumbing scatters the failure-mode logic across three
+  if/else branches.
+
+
+Proposed shape
+--------------
+
+1) Extract the conphi work into one helper (in setup.R). One
+   parameterestimates() call, derive bounds analytically, return a tidy
+   small data frame with one row per alpha:
+
+     conphi_rows <- function(conphi, latent1, latent2, alpha_vec, ...meta) {
+       if (!inherits(conphi$unconfit, "lavaan")) {
+         est <- se <- NA_real_
+       } else {
+         pe  <- parameterestimates(conphi$unconfit)
+         sel <- pe$lhs == latent1 & pe$rhs == latent2
+         est <- pe$est[sel]; se <- pe$se[sel]
+       }
+       z  <- qnorm(1 - alpha_vec/2)
+       data.frame(
+         ...meta,
+         method = "conphi",
+         alpha  = alpha_vec,
+         cor_est    = est,
+         se_cor_est = se,
+         lowerbound = est - z*se,
+         upperbound = est + z*se,
+         ...
+       )
+     }
+
+   One call, no guard repetition, no per-alpha refit. Result is already
+   stacked by alpha.
+
+2) Replace the inner foreach(type = ...) with lapply + do.call(rbind, ...),
+   vectorised over alpha:
+
+     htmt_rows <- do.call(rbind, lapply(
+       c("delta","boot","bcaboot","bcboot"), function(type) {
+         s <- simuresults[[type]]
+         data.frame(
+           ...meta,
+           method = type,
+           alpha  = alpha_vec,
+           cor_est    = simuresults$delta$HTMT,
+           se_cor_est = s$se,
+           lowerbound = unname(s$lowerbound),
+           upperbound = unname(s$upperbound),
+           ...
+         )
+       }))
+
+   No nested loop, no foreach overhead for a 4-element iterate.
+
+3) Define the row schema once. A small helper
+       make_row(meta, method, alpha, est, se, lo, up, time, ...conphi_only)
+   with NA_real_/NA_character_ defaults for the conphi-only columns. Then
+   both paths produce structurally identical rows -- impossible to drift.
+
+4) res <- rbind(conphi_rows, htmt_rows) at the top of the r-body. No inner
+   foreach, no uncon_valid threading.
+
+
+Tradeoffs
+---------
+Pro:
+  - One parameterestimates call instead of 4 per rep (tiny win at 1000 reps,
+    but real).
+  - Single source of truth for column schema.
+  - Failure path becomes one branch instead of three.
+
+Con:
+  - The analytic est +/- z*se bounds are only numerically identical to
+    lavaan's when lavaan uses Wald (which it does by default --
+    se = "standard"). If you ever switch to se = "robust.huber.white" or
+    bootstrap SEs in lavaan, the CIs would stop matching. Worth a comment
+    at the helper.
+  - Slight refactor risk -- diff one run's output against the current
+    version to confirm byte-identical rows before deleting the old code.
+
+
+Recommendation
+--------------
+Do steps 1 + 3 (the conphi helper + shared row schema). Skip step 2 until
+the foreach actually bothers you -- replacing a 4-iterate foreach is mostly
+aesthetic.

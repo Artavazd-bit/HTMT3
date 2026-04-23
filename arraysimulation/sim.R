@@ -7,7 +7,7 @@ library(covsim)
 
 source("code/setup.R")
 conditions <- readRDS("code/conditions.rds")
-n_batches <- max(conditions$rep_batch)
+n_batches <- 10 
 
 task_id <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 cond <- conditions[task_id,]
@@ -35,12 +35,19 @@ latent2 <- "xi_2"
 if(data_id == 1){
   datatype <- "normal"
 }else if(data_id == 2){
-  datatype <- "nonnormal"
+  datatype <- "moderatenonnormal"
   
   fit <- sem(current_model, do.fit = FALSE)
   popcov <- lavInspect(fit, "implied")$cov
-  popskew <- c(0.7, 0.9, 1.2, 1.5, 0.8, 1.3)
-  popkurt <- c(3.5, 3.6, 3.7, 3.5, 3.6, 3.7)
+  popskew <- c(rep(2, 6))
+  popkurt <- c(rep(7,6))
+}else if(data_id == 3){
+  datatype <- "severenonnormal"
+  
+  fit <- sem(current_model, do.fit = FALSE)
+  popcov <- lavInspect(fit, "implied")$cov
+  popskew <- c(rep(3,6))
+  popkurt<-  c(rep(21,6))
 }
 
 flat_cond <- function(x){
@@ -64,11 +71,12 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
                                empirical = FALSE,
                                return.type = "data.frame"
         )
-        }else if(data_id == 2){
+        }else if(data_id != 1){
           set.seed(seed)
-          data <- rIG(N = n, sigma.target = popcov, skewness = popskew, 
-                      excesskurtosis = popkurt, typeA = "symm")
-          data <- as.data.frame(data)
+          data <- covsim::rPLSIM(n, sigma.target = popcov, 
+                                 skewness=popskew, excesskurtosis=popkurt,
+                                 numsegments = 8)
+          data <- as.data.frame(data[[1]][[1]])
           colnames(data) <- colnames(popcov)
         }
         simuresults <- withCallingHandlers(
@@ -111,84 +119,108 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
           }
         )
         
+        testdiffstart <- Sys.time()
         conphi <- c_phi(model_constrained = model_constrained,
                         model_unconstrained = model_est,
                         data = data
                         )
+        conphipvalue <- 1 - pchisq(conphi$con_teststat - conphi$uncon_teststat,
+                                   df = conphi$con_df - conphi$uncon_df)
 
-        # FIX (review pt 3): flatten list-valued warnings/errors to character scalars
-        # so every column in conphirow stays atomic and rbind(res, conphirow) below
-        # doesn't hit a type mismatch against the atomic NA columns in `row`.
+        uncon_valid <- inherits(conphi$unconfit, "lavaan")
+        if (uncon_valid) {
+          parest_cfa  <- parameterestimates(conphi$unconfit)
+          cor_est_cfa <- parest_cfa$est[parest_cfa$lhs == latent1 & parest_cfa$rhs == latent2]
+          cor_est_se  <- parest_cfa$se[parest_cfa$lhs == latent1 & parest_cfa$rhs == latent2]
+        } else {
+          cor_est_cfa <- NA_real_
+          cor_est_se  <- NA_real_
+        }
+        testdiffend <- Sys.time()
+        testdiff <- as.numeric(testdiffend - testdiffstart, units = "secs")
         
         con_warn_flat   <- flat_cond(conphi$con_warning)
         uncon_warn_flat <- flat_cond(conphi$uncon_warning)
         con_err_flat    <- if(is.na(conphi$con_error))   NA_character_ else as.character(conphi$con_error)
         uncon_err_flat  <- if(is.na(conphi$uncon_error)) NA_character_ else as.character(conphi$uncon_error)
         
-        res <- foreach(type = c("delta", "boot", "bcaboot", "bcboot"), .combine = "rbind")%:%
-                foreach(indexgamma = 1:length(alpha_vec), .combine = "rbind") %do%
+        res <- foreach(indexgamma = 1:length(alpha_vec), .combine = "rbind") %do% 
                 {
-                  HTMT <- simuresults$delta$HTMT
-                  seHTMT <- simuresults[[type]]$se
-                  lowerbound <- unname(simuresults[[type]]$lowerbound[indexgamma])
-                  upperbound <- unname(simuresults[[type]]$upperbound[indexgamma])
-                  missing <- unname(simuresults[[type]]$missing)
-                  time <- simuresults[[type]]$time
-                  row <- data.frame(correlation = correlation
-                                    , n = n
-                                    , HTMT = HTMT
-                                    , seHTMT = seHTMT
-                                    , simruns = r
-                                    , batch = rep_batch
-                                    , datatype = datatype
-                                    , method = type
-                                    , alpha = alpha_vec[indexgamma]
-                                    , lowerbound = lowerbound
-                                    , upperbound =  upperbound
-                                    , coveragecorr = lowerbound <= correlation & correlation <=  upperbound
-                                    , coverageone =  lowerbound <= 1 & 1 <= upperbound
-                                    , time = time
-                                    , seed = seed
-                                    , missing = missing
-                                    , teststat_constrained = NA_real_
-                                    , teststat_unconstrained = NA_real_
-                                    , error_constrained = NA_character_
-                                    , error_unconstrained = NA_character_
-                                    , warning_constrained = NA_character_
-                                    , warning_unconstrained = NA_character_
-                                    , df_constrained = NA_real_
-                                    , df_unconstrained = NA_real_
+                  alpha <- alpha_vec[indexgamma]
+                  if (uncon_valid) {
+                    parest     <- parameterestimates(conphi$unconfit, level = 1 - alpha)
+                    lowerbound <- parest$ci.lower[parest$lhs == latent1 & parest$rhs == latent2]
+                    upperbound <- parest$ci.upper[parest$lhs == latent1 & parest$rhs == latent2]
+                  } else {
+                    lowerbound <- NA_real_
+                    upperbound <- NA_real_
+                  }
+                  
+                  conphirow <- data.frame(correlation = correlation
+                                          , n = n
+                                          , cor_est = cor_est_cfa
+                                          , se_cor_est = cor_est_se
+                                          , simruns = r
+                                          , batch = rep_batch
+                                          , datatype = datatype
+                                          , method = "conphi"
+                                          , alpha = alpha
+                                          , lowerbound = lowerbound
+                                          , upperbound =  upperbound
+                                          , coveragecorr = lowerbound <= correlation & correlation <=  upperbound
+                                          , coverageone =  lowerbound <= 1 & 1 <= upperbound
+                                          , time = testdiff
+                                          , seed = seed
+                                          , missing = NA 
+                                          , teststat_constrained = conphi$con_teststat
+                                          , teststat_unconstrained = conphi$uncon_teststat
+                                          , p_value = conphipvalue
+                                          , error_constrained = con_err_flat
+                                          , error_unconstrained = uncon_err_flat
+                                          , warning_constrained = con_warn_flat
+                                          , warning_unconstrained = uncon_warn_flat
+                                          , df_constrained = conphi$con_df
+                                          , df_unconstrained = conphi$uncon_df
                   )
                   
-                  row
+                  htmt <- foreach(type = c("delta", "boot", "bcaboot", "bcboot"), .combine = "rbind")%do%
+                    {
+                      HTMT <- simuresults$delta$HTMT
+                      seHTMT <- simuresults[[type]]$se
+                      lowerbound <- unname(simuresults[[type]]$lowerbound[indexgamma])
+                      upperbound <- unname(simuresults[[type]]$upperbound[indexgamma])
+                      missing <- unname(simuresults[[type]]$missing)
+                      time <- as.numeric(simuresults[[type]]$time, units = "secs")
+                      row <- data.frame(correlation = correlation
+                                        , n = n
+                                        , cor_est = HTMT
+                                        , se_cor_est = seHTMT
+                                        , simruns = r
+                                        , batch = rep_batch
+                                        , datatype = datatype
+                                        , method = type
+                                        , alpha = alpha_vec[indexgamma]
+                                        , lowerbound = lowerbound
+                                        , upperbound =  upperbound
+                                        , coveragecorr = lowerbound <= correlation & correlation <=  upperbound
+                                        , coverageone =  lowerbound <= 1 & 1 <= upperbound
+                                        , time = time
+                                        , seed = seed
+                                        , missing = missing
+                                        , teststat_constrained = NA_real_
+                                        , teststat_unconstrained = NA_real_
+                                        , p_value = NA_real_
+                                        , error_constrained = NA_character_
+                                        , error_unconstrained = NA_character_
+                                        , warning_constrained = NA_character_
+                                        , warning_unconstrained = NA_character_
+                                        , df_constrained = NA_real_
+                                        , df_unconstrained = NA_real_
+                      )
+                      row
+                    }
+                  rbind(conphirow, htmt)
                 }
-        conphirow <- data.frame(correlation = correlation
-                                , n = n
-                                , HTMT = NA
-                                , seHTMT = NA
-                                , simruns = r
-                                , batch = rep_batch
-                                , datatype = datatype
-                                , method = "conphi"
-                                , alpha = NA
-                                , lowerbound = NA
-                                , upperbound =  NA
-                                , coveragecorr = NA
-                                , coverageone =  NA
-                                , time = NA
-                                , seed = seed
-                                , missing = NA 
-                                , teststat_constrained = conphi$con_teststat
-                                , teststat_unconstrained = conphi$uncon_teststat
-                                , error_constrained = con_err_flat
-                                , error_unconstrained = uncon_err_flat
-                                , warning_constrained = con_warn_flat
-                                , warning_unconstrained = uncon_warn_flat
-                                , df_constrained = conphi$con_df
-                                , df_unconstrained = conphi$uncon_df
-        )
-          res <- rbind(res, conphirow)
-          res
       }
 
 outfile <- paste0("~/simulationhtmt/results/model_", cond$model, "_sample_size_",
@@ -215,6 +247,3 @@ if(!file.rename(tmpfile, outfile)){
   stop("file.rename failed even though tmpfile exists: ", tmpfile)
 }
 
-
-        
-        

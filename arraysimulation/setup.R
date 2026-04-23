@@ -476,6 +476,9 @@ c_phi <- function(model_constrained, model_unconstrained, data){
   
   
   return(list(
+    confit = con_model$res,
+    unconfit = uncon_model$res,
+    
     con_teststat = con_ts,
     con_df = con_df,
     
@@ -562,12 +565,22 @@ simModels
 
 rm(coefs, corr, param, simCommonFactor, save, i)
 ################################################################################
-model_est<- '
+# model_est<- '
+#               #  latent variables
+#                 xi_1 =~ x11 + x12 + x13
+#                 xi_2 =~ x21 + x22 + x23 
+#                 
+#                 xi_1 ~~ xi_2
+#               ' 
+
+model_est <- '
               #  latent variables
-                xi_1 =~ x11 + x12 + x13
-                xi_2 =~ x21 + x22 + x23 
+                xi_1 =~ NA*x11 + x12 + x13
+                xi_2 =~ NA*x21 + x22 + x23 
                 
                 xi_1 ~~ xi_2
+                xi_1 ~~ 1 * xi_1
+                xi_2 ~~ 1 * xi_2
               ' 
 
 model_constrained <- '
