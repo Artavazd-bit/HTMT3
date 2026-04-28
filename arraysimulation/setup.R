@@ -46,8 +46,9 @@ derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
   K_i <- length(unlist(listind1))
   K_j <- length(unlist(listind2))
   
-  withCallingHandlers(
-    tryCatch({
+  # CHANGED: outer withCallingHandlers removed so monoblock1/2 + numerator
+  # warnings propagate up to wrapper() and get captured in sim.R.
+  tryCatch({
     # caluclation of HTMT and HTMT2 and (analytical) gradient
     if (htmt2 == FALSE){
       A = 1/(K_i*K_j) * sum(cor_values$val[cor_values$type == "het"])
@@ -80,21 +81,16 @@ derivhtmt <- function(data, model, latent1, latent2, scale, htmt2){
     }else{
       stop("ERROR")
     }
-      if(is.na(A)) warning("numerator is NaN")
-      if(B < 0) warning("monoblock1 is negative")
-      if(C < 0) warning("monoblock2 is negative")
-      list(output = cor_values, HTMT = HTMT)
-    } , error = function(e){
-      cat("An error occurred:", e$message, "\n")
-      return(list(output = NA, HTMT = NA))
-    }),
-    warning = function(w){
-      cat("Warning:", w$message, "\n")
-      invokeRestart("muffleWarning")
-    }
-  )
-  
-} 
+    if(is.na(A)) warning("numerator is NaN")
+    if(B < 0) warning("monoblock1 is negative")
+    if(C < 0) warning("monoblock2 is negative")
+    list(output = cor_values, HTMT = HTMT)
+  } , error = function(e){
+    cat("An error occurred:", e$message, "\n")
+    return(list(output = NA, HTMT = NA))
+  })
+
+}
 ################################################################################
 ## calchtmt: calculates the htmt or htmt2 (htmt2) and if correlations or 
 #           covariances should be used.
@@ -419,7 +415,7 @@ bootbca <- function(data, nboot, alpha = 0.05, statisticfun, ...){
 #############################################################
 ## error handling function
 #############################################################
-jasonssuperdupererrorhandlingfunction <- function(fun, ...){
+safe_run <- function(fun, ...){
   warnings <- list()
   error <- NA
   
@@ -445,13 +441,13 @@ jasonssuperdupererrorhandlingfunction <- function(fun, ...){
 ## for the discussion
 ################################################################################
 c_phi <- function(model_constrained, model_unconstrained, data){
-  con_model <- jasonssuperdupererrorhandlingfunction(fun = sem, 
-                                                     model = model_constrained, 
-                                                     data = data
+  con_model <- safe_run(fun = sem,
+                        model = model_constrained,
+                        data = data
   )
-  uncon_model <- jasonssuperdupererrorhandlingfunction(fun = sem, 
-                                                       model = model_unconstrained, 
-                                                       data = data
+  uncon_model <- safe_run(fun = sem,
+                          model = model_unconstrained,
+                          data = data
   )
   
   

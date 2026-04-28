@@ -2,7 +2,8 @@ library(dplyr)
 library(ggplot2)
 library(patchwork)
 
-dfall <- readRDS("simresults/2026_04_22_arrayresults/aggregated.rds")
+dfall <- readRDS("simresults/2026_04_25_arrayresults/aggregated.rds")
+length(unique(dfall$source_file)) == 1350
 
 dfall$upperwithin <- dfall$correlation < dfall$upperbound
 dfall$lowerwithin <- dfall$correlation > dfall$lowerbound
@@ -10,7 +11,8 @@ dfall$lowerwithin <- dfall$correlation > dfall$lowerbound
 dfall$correlation <- format(dfall$correlation, nsmall = 2)
 dfall$correlation <- paste("Phi ==", dfall$correlation)
 
-resag <- dfall %>% 
+dfall2 <- dfall[!is.na(dfall$lowerbound),]
+resag <- dfall2 %>% 
   group_by(correlation, n, datatype, alpha, method) %>%
   summarize(upperwithin = mean(upperwithin)*100,
             lowerwithin = mean(lowerwithin)*100,
@@ -18,14 +20,16 @@ resag <- dfall %>%
             covagcorrag = mean(coveragecorr)*100
   )
 
+
 resag$method2[resag$method == "boot"] <- "Percentile" 
 resag$method2[resag$method == "delta"] <- "Asymptotic" 
 resag$method2[resag$method == "bcaboot"] <- "BCa"
 resag$method2[resag$method == "bcboot"] <- "BC"
+resag$method2[resag$method == "conphi"] <- "cfa"
 
 
 
-resag$method2 <- factor(resag$method2, levels=c("Percentile", "Asymptotic", "BCa", "BC"))
+resag$method2 <- factor(resag$method2, levels=c("Percentile", "Asymptotic", "BCa", "BC", "cfa"))
 
 resag <- resag[!is.na(resag$method2),] 
 
@@ -33,8 +37,8 @@ resag <- resag[!is.na(resag$method2),]
 ## Coverage of corr
 ################################################################################
 alpha = c(0.05)
-datatype = "nonnormal"
-lowertick <- 80
+datatype = "severenonnormal"
+lowertick <- 60
 
 y_breaks <- c(seq(lowertick, 100, by = 5), (1-alpha/2)*100)
 
@@ -65,9 +69,48 @@ p_lower_n <- ggplot(resag[resag$alpha == alpha & resag$datatype == datatype,], a
   scale_linetype_discrete(name = "Type of CI:") +
   scale_shape_discrete(name = "Type of CI:")
 
-popcov005nonnormal <- p_upper_n / p_lower_n
-ggsave("popcoverage_005_nonnormal.png", plot = popcov005nonnormal, width = 12.375, height = 9.15625)
+popcov005severenonnormal <- p_upper_n / p_lower_n
+ggsave("2026_04_25_plots/popcoverage_005_nonnormal_severe.png", plot = popcov005severenonnormal, width = 12.375, height = 9.15625)
 ###############################################################################alpha = c(0.05)
+alpha = c(0.05)
+datatype = "moderatenonnormal"
+lowertick <- 65
+
+y_breaks <- c(seq(lowertick, 100, by = 5), (1-alpha/2)*100)
+
+decimal_labeller <- function(x) {
+  sprintf("%.2f", as.numeric(x))
+}
+
+p_upper_n <- ggplot(resag[resag$alpha == alpha & resag$datatype == datatype,], aes(x = as.factor(n), y = upperwithin, group = method)) +
+  geom_line(aes(linetype = method2)) +
+  geom_point(aes(shape = method2)) +
+  facet_grid(cols = vars(correlation), labeller = label_parsed) + 
+  geom_hline(yintercept = (1-alpha/2)*100) + 
+  scale_y_continuous(name = "Pop. correlation value below upper limit (%)", breaks = y_breaks, 
+                     limits = c(lowertick, 100) )  +
+  theme_minimal() +
+  theme(legend.position = "none", 
+        axis.title.x = element_blank(), 
+        axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank()) 
+
+p_lower_n <- ggplot(resag[resag$alpha == alpha & resag$datatype == datatype,], aes(x = as.factor(n), y = lowerwithin, group = method)) +
+  geom_line(aes(linetype = method2)) +
+  geom_point(aes(shape = method2)) +
+  facet_grid(cols = vars(correlation), labeller = label_parsed) + 
+  geom_hline(yintercept = (1-alpha/2)*100) +
+  scale_y_reverse(name = "Pop. correlation value above lower limit (%)", breaks = y_breaks, 
+                  limits = c(100, lowertick)) +
+  theme_minimal() +
+  theme(legend.position = "bottom", strip.text.x = element_blank()) +
+  labs(x = "Sample size") + 
+  scale_linetype_discrete(name = "Type of CI:") +
+  scale_shape_discrete(name = "Type of CI:")
+
+popcov005nonnormal_moderate <- p_upper_n / p_lower_n
+ggsave("2026_04_25_plots/popcoverage_005_nonnormal_moderate.png", plot = popcov005nonnormal_moderate, width = 12.375, height = 9.15625)
+################################################################################
 alpha = c(0.05)
 datatype = "normal"
 lowertick <- 85
@@ -94,7 +137,7 @@ p_upper_n <- ggplot(resag[resag$alpha == alpha & resag$datatype == datatype,], a
 p_lower_n <- ggplot(resag[resag$alpha == alpha & resag$datatype == datatype,], aes(x = as.factor(n), y = lowerwithin, group = method)) +
   geom_line(aes(linetype = method2)) +
   geom_point(aes(shape = method2)) +
-  facet_grid(cols = vars(correlation), labeller = label_parsed, ) + 
+  facet_grid(cols = vars(correlation), labeller = label_parsed) + 
   geom_hline(yintercept = (1-alpha/2)*100) +
   scale_y_reverse(name = "Pop. correlation value above lower limit (%)", breaks = y_breaks, 
                   limits = c(100, lowertick)) +
@@ -105,8 +148,8 @@ p_lower_n <- ggplot(resag[resag$alpha == alpha & resag$datatype == datatype,], a
   scale_shape_discrete(name = "Type of CI:")
 
 popcov005normal <- p_upper_n / p_lower_n
-ggsave("popcoverage_005_normal.png", plot = popcov005normal, width = 12.375, height = 9.15625)
-################################################################################
+ggsave("2026_04_25_plots/popcoverage_005_normal.png", plot = popcov005normal, width = 12.375, height = 9.15625)
+###############################################################################################
 alpha = c(0.10)
 datatype = "nonnormal"
 lowertick <- 75

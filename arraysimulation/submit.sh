@@ -14,4 +14,4 @@
 
 echo "Running Task: ${SLURM_ARRAY_TASK_ID} on host $(hostname)"
 R --version
-srun Rscript code/sim.R
+Rscript code/sim.R

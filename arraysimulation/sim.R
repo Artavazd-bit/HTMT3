@@ -14,7 +14,7 @@ cond <- conditions[task_id,]
 
 total_reps <- 1000
 number_bootruns <- 1000
-alpha_vec <- c(0.05, 0.1, 0.01)
+alpha_vec <- c(0.01, 0.05, 0.1)
 
 rep_batch <- cond$rep_batch
 reps_per_batch <- total_reps / n_batches
@@ -55,11 +55,22 @@ flat_cond <- function(x){
   paste(vapply(x, conditionMessage, character(1)), collapse = " | ")
 }
 
-cat(sprintf("Task %d | model=%d n=%d batch=%d datatype=%s | reps %d-%d | corr=%.2f\n",
-            task_id, model_id, n, rep_batch, datatype, start_rep, end_rep, correlation))
+# CHANGED: helper to merge constrained + unconstrained strings into one cell
+# while preserving which side each message came from.
+combine_two <- function(a, b){
+  parts <- c(if(!is.na(a)) paste0("con: ", a),
+             if(!is.na(b)) paste0("uncon: ", b))
+  if(length(parts) == 0) NA_character_ else paste(parts, collapse = " || ")
+}
+
+
 
 partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
       {
+        cat(sprintf("Task %d | model=%d n=%d batch=%d datatype=%s | reps %d-%d | corr=%.2f| r = %d\n ",
+                    task_id, model_id, n, rep_batch, datatype, start_rep, end_rep, correlation, r))
+        
+        
         seed <- r + (model_id) * 10000 + (data_id) * 100000 + (n_id) * 1000000
         seed <- as.integer(seed)
         if(data_id == 1){
@@ -79,45 +90,33 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
           data <- as.data.frame(data[[1]][[1]])
           colnames(data) <- colnames(popcov)
         }
-        simuresults <- withCallingHandlers(
-          tryCatch({
-            wrapper(data = data,
-                    model = model_est,
-                    latent1 = latent1,
-                    latent2 = latent2,
-                    alpha = alpha_vec,
-                    scale = FALSE,
-                    htmt2 = FALSE,
-                    nboot = number_bootruns)
-          }, error = function(e){
-            cat("An error occured:", e$message, "\n")
-            list(delta = list(HTMT = NA,
-                              se = NA,
-                              lowerbound = NA,
-                              upperbound = NA,
-                              time = NA,
-                              missing = NA),
-                 boot = list(se = NA,
-                             lowerbound = NA,
-                             upperbound = NA,
-                             missing = NA,
-                             time = NA),
-                 bcaboot = list(se = NA,
-                                lowerbound = NA,
-                                upperbound = NA,
-                                time = NA,
-                                missing = NA),
-                 bcboot = list(se = NA,
-                               lowerbound = NA,
-                               upperbound = NA,
-                               missing = NA,
-                               time = NA))
-          }),
-          warning = function(w){
-            cat("Warning:", w$message, "\n")
-            invokeRestart("muffleWarning")
-          }
+        # CHANGED: capture HTMT-side warnings (incl. "monoblock1/2 is negative",
+        # "numerator is NaN") into htmt_warn_flat instead of muffling them.
+        na_simuresults <- list(
+          delta   = list(HTMT = NA, se = NA, lowerbound = NA, upperbound = NA,
+                         time = NA, missing = NA),
+          boot    = list(se = NA, lowerbound = NA, upperbound = NA,
+                         missing = NA, time = NA),
+          bcaboot = list(se = NA, lowerbound = NA, upperbound = NA,
+                         time = NA, missing = NA),
+          bcboot  = list(se = NA, lowerbound = NA, upperbound = NA,
+                         missing = NA, time = NA)
         )
+        htmt_run <- safe_run(
+          fun     = wrapper,
+          data    = data,
+          model   = model_est,
+          latent1 = latent1,
+          latent2 = latent2,
+          alpha   = alpha_vec,
+          scale   = FALSE,
+          htmt2   = FALSE,
+          nboot   = number_bootruns
+        )
+        simuresults    <- if(is.na(htmt_run$error)) htmt_run$res else na_simuresults
+        htmt_warn_flat <- flat_cond(htmt_run$warnings)
+        htmt_err_flat  <- if(is.na(htmt_run$error)) NA_character_
+                          else as.character(htmt_run$error)
         
         testdiffstart <- Sys.time()
         conphi <- c_phi(model_constrained = model_constrained,
@@ -143,6 +142,10 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
         uncon_warn_flat <- flat_cond(conphi$uncon_warning)
         con_err_flat    <- if(is.na(conphi$con_error))   NA_character_ else as.character(conphi$con_error)
         uncon_err_flat  <- if(is.na(conphi$uncon_error)) NA_character_ else as.character(conphi$uncon_error)
+
+        # CHANGED: collapse the four conphi error/warning strings into one of each
+        conphi_warn <- combine_two(con_warn_flat, uncon_warn_flat)
+        conphi_err  <- combine_two(con_err_flat,  uncon_err_flat)
         
         res <- foreach(indexgamma = 1:length(alpha_vec), .combine = "rbind") %do% 
                 {
@@ -155,7 +158,7 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
                     lowerbound <- NA_real_
                     upperbound <- NA_real_
                   }
-                  
+
                   conphirow <- data.frame(correlation = correlation
                                           , n = n
                                           , cor_est = cor_est_cfa
@@ -171,14 +174,12 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
                                           , coverageone =  lowerbound <= 1 & 1 <= upperbound
                                           , time = testdiff
                                           , seed = seed
-                                          , missing = NA 
+                                          , missing = NA
                                           , teststat_constrained = conphi$con_teststat
                                           , teststat_unconstrained = conphi$uncon_teststat
                                           , p_value = conphipvalue
-                                          , error_constrained = con_err_flat
-                                          , error_unconstrained = uncon_err_flat
-                                          , warning_constrained = con_warn_flat
-                                          , warning_unconstrained = uncon_warn_flat
+                                          , error = conphi_err
+                                          , warning = conphi_warn
                                           , df_constrained = conphi$con_df
                                           , df_unconstrained = conphi$uncon_df
                   )
@@ -191,6 +192,8 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
                       upperbound <- unname(simuresults[[type]]$upperbound[indexgamma])
                       missing <- unname(simuresults[[type]]$missing)
                       time <- as.numeric(simuresults[[type]]$time, units = "secs")
+                      # CHANGED: error/warning are now the HTMT-side strings
+                      # captured from wrapper() (incl. monoblock1/2-negative).
                       row <- data.frame(correlation = correlation
                                         , n = n
                                         , cor_est = HTMT
@@ -210,10 +213,8 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
                                         , teststat_constrained = NA_real_
                                         , teststat_unconstrained = NA_real_
                                         , p_value = NA_real_
-                                        , error_constrained = NA_character_
-                                        , error_unconstrained = NA_character_
-                                        , warning_constrained = NA_character_
-                                        , warning_unconstrained = NA_character_
+                                        , error = htmt_err_flat
+                                        , warning = htmt_warn_flat
                                         , df_constrained = NA_real_
                                         , df_unconstrained = NA_real_
                       )
@@ -225,25 +226,19 @@ partial <- foreach(r = start_rep : end_rep, .combine = "rbind")%do%
 
 outfile <- paste0("~/simulationhtmt/results/model_", cond$model, "_sample_size_",
                   cond$n, "_batch_", cond$rep_batch, "_datatype_", data_id, ".rds")
-tmpfile <- paste0(outfile, ".tmp")
 
-cat("About to saveRDS to tmp file:", tmpfile, "\n")
+cat("About to saveRDS to rds file:", outfile, "\n")
 success <- FALSE
 for(i in 1:3){
-  tryCatch(saveRDS(partial, tmpfile, version = 2),
+  tryCatch(saveRDS(partial, outfile, version = 2),
            error = function(e) cat("saveRDS attempt", i, "threw:", conditionMessage(e), "\n"))
-  if(file.exists(tmpfile) && file.info(tmpfile)$size > 0){
+  if(file.exists(outfile) && file.info(outfile)$size > 0){
     success <- TRUE
     break
   }
-  cat("attempt", i, "failed, tmpfile missing or empty -- retrying in 5s\n")
+  cat("attempt", i, "failed, outfile missing or empty -- retrying in 5s\n")
   Sys.sleep(5)
 }
-if(!success) stop("saveRDS failed after 3 attempts: ", tmpfile)
-
-Sys.sleep(3)   # NFS flush buffer before rename
-cat("renaming to:", outfile, "\n")
-if(!file.rename(tmpfile, outfile)){
-  stop("file.rename failed even though tmpfile exists: ", tmpfile)
-}
+if(!success) stop("saveRDS failed after 3 attempts: ", outfile)
+if(success) cat("saveRDS succeded", outfile)
 

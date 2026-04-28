@@ -6,8 +6,8 @@
 
 library(dplyr)
 
-results_dir  <- "simresults/2026_04_22_arrayresults/results2test/results"
-out_dir      <- "simresults/2026_04_22_arrayresults"
+results_dir  <- "simresults/2026_04_25_arrayresults/results"
+out_dir      <- "simresults/2026_04_25_arrayresults/"
 out_file     <- file.path(out_dir, "aggregated.rds")
 fail_file    <- file.path(out_dir, "aggregation_failures.csv")
 
